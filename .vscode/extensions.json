@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-vscode.js-debug-nightly",
+    "bradlc.vscode-tailwindcss",
+    "heybourn.headwind",
+    "esbenp.prettier-vscode",
+    "qwtel.sqlite-viewer"
+  ]
+}

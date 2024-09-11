@@ -1,0 +1,51 @@
+name: Build and push the Web container image
+ 
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'web/**'
+      - '.github/workflows/web.container.yml'
+  workflow_dispatch:
+ 
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+ 
+concurrency:
+  group: "Web Container"
+  cancel-in-progress: true
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.6
+        with:
+          sparse-checkout: "web"
+          sparse-checkout-cone-mode: false
+ 
+      - name: Move files in the "web" folder to the root
+        run: |
+          ls -lah
+          shopt -s dotglob
+          mv web/* .
+          rm -rf web
+          ls -lah
+ 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+ 
+      - name: Build the docker image
+        run: |
+          docker build . --tag ghcr.io/${{ github.repository }}-web:latest
+          docker push ghcr.io/${{ github.repository }}-web:latest

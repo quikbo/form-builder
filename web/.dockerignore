@@ -1,0 +1,31 @@
+# Ignore environment settings
+.env
+ 
+# Ignore node modules
+node_modules/
+ 
+# Ignore logs
+logs
+*.log
+npm-debug.log*
+ 
+# Ignore version control directories
+.git
+.gitignore
+ 
+# Ignore build output directories
+/dist
+/out
+ 
+# Ignore temporary files
+*.tmp
+*.temp
+ 
+# Ignore configuration files that are not needed
+.dockerignore
+Dockerfile
+*.md
+LICENSE
+ 
+# Local database files
+*.db
