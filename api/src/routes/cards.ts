@@ -1,7 +1,5 @@
 import { Hono } from "hono";
-import { db } from "../db";
-import { cards, decks, users } from "../db/schema";
-import { eq, and, like, count, desc, asc, SQL } from "drizzle-orm";
+import { Card, Deck, User } from "../db/models";
 import { zValidator } from "@hono/zod-validator";
 import {
   createCardSchema,
@@ -17,43 +15,33 @@ import { Context } from "../lib/context";
 
 const cardsRouter = new Hono<Context>();
 
-//helper function to retrieve a deck's # of cards in order to update that attribute
-const getDeckNumberOfCards = async (
-  deck_id: number,
-  changeInCards: number,
-  c: any,
-): Promise<number> => {
-  const deck = await db.select().from(decks).where(eq(decks.id, deck_id)).get();
-  if (!deck) {
-    throw new HTTPException(404, { message: "Deck not found" });
-  }
-  return deck.numberOfCards + changeInCards;
-};
+// // MIGHT NOT BE NECESSARYhelper function to retrieve a deck's # of cards in order to update that attribute
+// const getDeckNumberOfCards = async (
+//   deck_id: number,
+//   changeInCards: number,
+//   c: any,
+// ): Promise<number> => {
+//   const deck = await db.select().from(decks).where(eq(decks.id, deck_id)).get();
+//   if (!deck) {
+//     throw new HTTPException(404, { message: "Deck not found" });
+//   }
+//   return deck.numberOfCards + changeInCards;
+// };
 
 //helper function to update a deck's # of cards when a card is added or deleted from it
 const updateDeckNumberOfCards = async (
   deck_id: number,
   changeInCards: number,
-  c: any,
 ) => {
-  const newNumberOfCards = await getDeckNumberOfCards(
-    deck_id,
-    changeInCards,
-    c,
-  );
-  const updatedDeck = await db
-    .update(decks)
-    .set({ numberOfCards: newNumberOfCards })
-    .where(eq(decks.id, deck_id))
-    .returning()
-    .get();
-  if (!updatedDeck) {
-    throw new HTTPException(404, { message: "Post not found" });
+  const deck = await Deck.findById(deck_id);
+  if (!deck) {
+    throw new HTTPException(404, { message: "Deck not found" });
   }
-  return c.json(updatedDeck);
+  deck.numberOfCards += changeInCards;
+  await deck.save();
 };
 
-//GET route for all cards from a specific deck
+// GET all cards from a specific deck
 cardsRouter.get(
   "/decks/:deck_id/cards",
   authGuard,
@@ -69,51 +57,43 @@ cardsRouter.get(
   }),
   async (c) => {
     const { deck_id } = c.req.valid("param");
-    const { sort, search, page = 1, limit = 10 } = c.req.valid("query");
+    const { sort = "asc", search = "", page = 1, limit = 10 } = c.req.valid("query");
 
-    const whereClause: (SQL | undefined)[] = [];
-    if (search) {
-      whereClause.push(like(cards.front || cards.back, `%${search}%`));
-    }
-
-    const orderByClause: SQL[] = [];
-    if (sort === "desc") {
-      orderByClause.push(desc(cards.date));
-    } else if (sort === "asc") {
-      orderByClause.push(asc(cards.date));
-    }
-
-    const offset = (page - 1) * limit;
-
-    //ensuring deck and user are valid
-    const deck = await db
-      .select()
-      .from(decks)
-      .where(eq(decks.id, deck_id))
-      .get();
+    // Find the deck and ensure the user is authorized to access it
+    const deck = await Deck.findById(deck_id);
     if (!deck) {
       throw new HTTPException(404, { message: "Deck not found" });
     }
     const user = c.get("user");
-    if (deck.userId !== user!.id) {
+    if (deck.userId.toString() !== user!.id) {
       throw new HTTPException(403, {
         message: "Unauthorized to fetch cards in this deck",
       });
     }
 
-    const [cardsData, [{ totalCount }]] = await Promise.all([
-      db
-        .select()
-        .from(cards)
-        .where(and(...whereClause, eq(cards.deckId, deck_id)))
-        .orderBy(...orderByClause)
-        .limit(limit)
-        .offset(offset),
-      db
-        .select({ totalCount: count() })
-        .from(cards)
-        .where(and(...whereClause, eq(cards.deckId, deck_id))),
-    ]);
+    // Build query for cards
+    const cardQuery: Record<string, any> = {
+      deckId: deck_id,
+    };
+    if (search) {
+      cardQuery["$or"] = [
+        { front: { $regex: search, $options: "i" } },
+        { back: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Handle sorting
+    const sortOptions: Record<string, 1 | -1> = {
+      date: sort === "desc" ? -1 : 1, // Use -1 for descending and 1 for ascending
+    };
+
+    // Paginate results
+    const cardsData = await Card.find(cardQuery)
+      .sort(sortOptions)
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalCount = await Card.countDocuments(cardQuery);
 
     return c.json({
       success: true,
@@ -123,13 +103,13 @@ cardsRouter.get(
         page,
         limit,
         totalPages: Math.ceil(totalCount / limit),
-        totalCount: totalCount,
+        totalCount,
       },
     });
-  },
+  }
 );
 
-//GET route for a specific card from a specific deck
+// GET a specific card from a specific deck
 cardsRouter.get(
   "/decks/:deck_id/cards/:id",
   authGuard,
@@ -141,39 +121,33 @@ cardsRouter.get(
   async (c) => {
     const { deck_id, id } = c.req.valid("param");
 
-    //ensuring deck and user are valid
-    const deck = await db
-      .select()
-      .from(decks)
-      .where(eq(decks.id, deck_id))
-      .get();
+    // Find the deck and ensure the user is authorized
+    const deck = await Deck.findById(deck_id);
     if (!deck) {
       throw new HTTPException(404, { message: "Deck not found" });
     }
     const user = c.get("user");
-    if (deck.userId !== user!.id) {
+    if (deck.userId.toString() !== user!.id) {
       throw new HTTPException(403, {
         message: "Unauthorized to fetch cards in this deck",
       });
     }
 
-    const card = await db
-      .select()
-      .from(cards)
-      .where(and(eq(cards.id, id), eq(cards.deckId, deck_id)))
-      .get();
+    // Find the card
+    const card = await Card.findOne({ _id: id, deckId: deck_id });
     if (!card) {
       throw new HTTPException(404, { message: "Card not found" });
     }
+
     return c.json({
       success: true,
       message: "Card retrieved successfully",
       data: card,
     });
-  },
+  }
 );
 
-//DELETE route for a specific card from a specific deck
+// DELETE a specific card from a specific deck
 cardsRouter.delete(
   "/decks/:deck_id/cards/:id",
   authGuard,
@@ -186,45 +160,35 @@ cardsRouter.delete(
     const { deck_id, id } = c.req.valid("param");
     const user = c.get("user");
 
-    const card = await db
-      .select()
-      .from(cards)
-      .where(and(eq(cards.id, Number(id)), eq(cards.deckId, Number(deck_id))))
-      .get();
-    if (!card) {
-      throw new HTTPException(404, { message: "Card not found" });
-    }
-    //ensuring fdeck exists and same user
-    const deck = await db
-      .select()
-      .from(decks)
-      .where(eq(decks.id, deck_id))
-      .get();
+    // Ensure deck exists and belongs to the user
+    const deck = await Deck.findById(deck_id);
     if (!deck) {
       throw new HTTPException(404, { message: "Deck not found" });
     }
-    if (deck.userId !== user!.id) {
+    if (deck.userId.toString() !== user!.id) {
       throw new HTTPException(403, {
         message: "Unauthorized to delete cards in this deck",
       });
     }
 
-    const deletedCard = await db
-      .delete(cards)
-      .where(and(eq(cards.id, Number(id)), eq(cards.deckId, Number(deck_id))))
-      .returning()
-      .get();
+    // Find and delete the card
+    const card = await Card.findOneAndDelete({ _id: id, deckId: deck_id });
+    if (!card) {
+      throw new HTTPException(404, { message: "Card not found" });
+    }
 
-    updateDeckNumberOfCards(deck_id, -1, c);
+    // Update the deck's number of cards
+    await updateDeckNumberOfCards(deck_id, -1);
+
     return c.json({
       success: true,
       message: "Card deleted successfully",
-      data: deletedCard,
+      data: card,
     });
-  },
+  }
 );
 
-//POST route for a card that gets assigned to a deck through foreign key
+// POST route to add a card to a deck
 cardsRouter.post(
   "/decks/:deck_id/cards",
   authGuard,
@@ -242,44 +206,42 @@ cardsRouter.post(
     const { deck_id } = c.req.valid("param");
     const user = c.get("user");
 
-    const deck = await db
-      .select()
-      .from(decks)
-      .where(eq(decks.id, deck_id))
-      .get();
+    // Find the deck and ensure user is authorized
+    const deck = await Deck.findById(deck_id);
     if (!deck) {
       throw new HTTPException(404, { message: "Deck not found" });
     }
-    if (deck.userId !== user!.id) {
+    if (deck.userId.toString() !== user!.id) {
       throw new HTTPException(403, {
         message: "Unauthorized to add cards to this deck",
       });
     }
 
-    const { front, back } = await c.req.valid("json");
-    const newCard = await db
-      .insert(cards)
-      .values({
-        front,
-        back,
-        date: new Date(),
-        deckId: deck_id,
-      })
-      .returning()
-      .get();
-    updateDeckNumberOfCards(deck_id, 1, c);
+    const { front, back } = c.req.valid("json");
+
+    // Create the new card
+    const newCard = await Card.create({
+      front,
+      back,
+      date: new Date(),
+      deckId: deck_id,
+    });
+
+    // Update the deck's number of cards
+    await updateDeckNumberOfCards(deck_id, 1);
+
     return c.json(
       {
         success: true,
         message: "Card created successfully",
         data: newCard,
       },
-      201,
+      201
     );
-  },
+  }
 );
 
-//PATCH route for a card
+// PATCH route to update a card
 cardsRouter.patch(
   "/decks/:deck_id/cards/:id",
   authGuard,
@@ -290,56 +252,43 @@ cardsRouter.patch(
   }),
   zValidator("param", getCardSchema, (result, c) => {
     if (!result.success) {
-      return c.json(
-        {
-          success: result.success,
-          message: `${result.error.issues[0].path}: ${result.error.issues[0].message}`,
-          meta: result.error,
-        },
-        400,
-      );
+      return zCustomErrorMessage(result, c);
     }
   }),
   async (c) => {
-    const { front, back } = await c.req.valid("json");
+    const { front, back } = c.req.valid("json");
     const { deck_id, id } = c.req.valid("param");
 
     const user = c.get("user");
-    const card = await db
-      .select()
-      .from(cards)
-      .where(and(eq(cards.id, Number(id)), eq(cards.deckId, Number(deck_id))))
-      .get();
-    if (!card) {
-      throw new HTTPException(404, { message: "Card not found" });
-    }
-    const deck = await db
-      .select()
-      .from(decks)
-      .where(eq(decks.id, deck_id))
-      .get();
+
+    // Ensure the deck exists and the user is authorized
+    const deck = await Deck.findById(deck_id);
     if (!deck) {
       throw new HTTPException(404, { message: "Deck not found" });
     }
-    if (deck.userId !== user!.id) {
+    if (deck.userId.toString() !== user!.id) {
       throw new HTTPException(403, {
         message: "Unauthorized to edit cards in this deck",
       });
     }
 
-    const updatedCard = await db
-      .update(cards)
-      .set({ front, back })
-      .where(and(eq(cards.id, Number(id)), eq(cards.deckId, Number(deck_id))))
-      .returning()
-      .get();
+    // Find and update the card
+    const updatedCard = await Card.findOneAndUpdate(
+      { _id: id, deckId: deck_id },
+      { front, back },
+      { new: true }
+    );
+
+    if (!updatedCard) {
+      throw new HTTPException(404, { message: "Card not found" });
+    }
 
     return c.json({
       success: true,
       message: "Card updated successfully",
       data: updatedCard,
     });
-  },
+  }
 );
 
 export default cardsRouter;

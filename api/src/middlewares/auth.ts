@@ -1,9 +1,12 @@
 import type { Context, Next } from "hono";
 import { lucia } from "../db/auth";
 
+
 export const auth = async (c: Context, next: Next) => {
   const cookie = c.req.header("Cookie") ?? "";
+  console.log("Cookie: ", cookie)
   const sessionId = lucia.readSessionCookie(cookie);
+  console.log("seshId: ", sessionId)
   if (!sessionId) {
     c.set("user", null);
     c.set("session", null);

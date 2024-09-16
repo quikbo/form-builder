@@ -1,9 +1,11 @@
 import { Lucia, TimeSpan } from "lucia";
-import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
-import { db } from "./index";
-import { sessions, users } from "./schema";
+import { MongodbAdapter } from "@lucia-auth/adapter-mongodb";
+import  mongoose  from "mongoose";
 
-const adapter = new DrizzleSQLiteAdapter(db, sessions, users);
+const adapter = new MongodbAdapter(
+	mongoose.connection.collection("sessions"),
+	mongoose.connection.collection("users")
+);
 
 export const lucia = new Lucia(adapter, {
   sessionCookie: {
@@ -12,12 +14,12 @@ export const lucia = new Lucia(adapter, {
       sameSite: "lax",
     },
   },
-  sessionExpiresIn: new TimeSpan(1, "h"),
+  sessionExpiresIn: new TimeSpan(2, "h"),
 });
 
 declare module "lucia" {
   interface Register {
     Lucia: typeof lucia;
-    UserId: number;
+    UserId: string;
   }
 }

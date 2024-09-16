@@ -7,6 +7,14 @@ import authRoutes from "./routes/auth";
 import { logger } from "hono/logger";
 import { auth } from "./middlewares/auth";
 import { Context } from "./lib/context";
+import { connectToDatabase } from './db/index'; // Adjust the path as necessary
+
+// Connect to MongoDB
+connectToDatabase().then(() => {
+  console.log("Connected to MongoDB");
+}).catch(err => {
+  console.error("MongoDB connection error", err);
+});
 
 const app = new Hono<Context>();
 

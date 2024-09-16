@@ -1,9 +1,20 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import * as schema from "./schema";
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const DATABASE_FILE = process.env.DB_FILE || "sqlite.db";
+// Load environment variables from .env file
+dotenv.config();
 
-export const connection = new Database(DATABASE_FILE);
+const DATABASE_URL = process.env.MONGODB_URL!;
 
-export const db = drizzle(connection, { schema });
+export const connectToDatabase = async () => {
+  try {
+    console.log(DATABASE_URL)
+    await mongoose.connect(DATABASE_URL);
+    console.log('Successfully connected to MongoDB.');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    process.exit(1);
+  }
+};
+
+// Call the connection function wherever necessary to connect to the database

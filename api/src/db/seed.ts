@@ -1,28 +1,22 @@
-import { eq, sql } from "drizzle-orm";
-import { db, connection } from "./index";
-import { decks, cards, users, sessions } from "./schema";
 import { faker } from "@faker-js/faker";
 import { hash } from "@node-rs/argon2";
-import { hashOptions } from "../routes/auth";
+import { User, Deck, Card, Session } from "./models";  // Mongoose models
+import mongoose from "mongoose";
+import { connectToDatabase } from "./index";
 
 async function seed() {
+  console.log("Connecting to the database...");
+  await connectToDatabase();
   console.log("Seeding the database...");
 
   console.log("Cleaning existing data...");
-  await db.delete(cards);
-  await db.delete(decks);
-  await db.delete(users);
-  await db.delete(sessions);
-  await db.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('decks')`);
-  await db.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('cards')`);
-  await db.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('users')`);
-  await db.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('sessions')`);
+  await Card.deleteMany({});
+  await Deck.deleteMany({});
+  await User.deleteMany({});
+  await Session.deleteMany({});
 
   console.log("Inserting new seed data...");
 
-  //inserting 50 decks with randomized fake titles and a random amount of cards
-  //with fake front and back data, these sample keywords are here to test
-  //search query parameter
   const sampleKeywords = [
     "technology",
     "innovation",
@@ -40,16 +34,13 @@ async function seed() {
 
   const sampleUsers = [];
   for (let i = 0; i <= 10; i++) {
-    const user = await db
-      .insert(users)
-      .values({
-        name: faker.person.fullName(),
-        username: `user-${i}`,
-        password_hash: await hash(`pass-${i}`, hashOptions),
-      })
-      .returning()
-      .get();
-
+    const user = new User({
+      _id: `id-${i}`,
+      name: faker.person.fullName(),
+      username: `user-${i}`,
+      password_hash: await hash(`pass-${i}`),
+    });
+    await user.save();  // Save each user to the database
     sampleUsers.push(user);
   }
 
@@ -62,20 +53,14 @@ async function seed() {
     const title = `Deck ${i} ${randomKeywords.join(" ")} `;
     const randomUser = faker.helpers.arrayElement(sampleUsers);
 
-    const deck = await db
-      .insert(decks)
-      .values({
-        title,
-        numberOfCards: 0,
-        date: faker.date.recent({
-          days: 5,
-        }),
-        userId: randomUser.id,
-      })
-      .returning()
-      .get();
+    const deck = new Deck({
+      title,
+      numberOfCards: 0,
+      date: faker.date.recent({ days: 5 }),
+      userId: randomUser._id,  // Reference by ObjectId
+    });
+    await deck.save();
 
-    //adding cards to every deck
     const numCards = faker.number.int({ min: 3, max: 25 });
     for (let j = 0; j < numCards; j++) {
       const randomKeywords = faker.helpers.arrayElements(sampleKeywords, {
@@ -85,21 +70,18 @@ async function seed() {
       const front = `Card ${j} Front ${randomKeywords.join(" ")}`;
       const back = `Back ${randomKeywords.join(" ")}`;
 
-      await db.insert(cards).values({
+      const card = new Card({
         front,
         back,
-        date: faker.date.recent({
-          days: 4.5,
-        }),
-        deckId: deck.id,
+        date: faker.date.recent({ days: 4.5 }),
+        deckId: deck._id,  // Reference by ObjectId
       });
-      await db
-        .update(decks)
-        .set({ numberOfCards: ++deck.numberOfCards })
-        .where(eq(decks.id, deck.id))
-        .returning()
-        .get();
+      await card.save();
+
+      // Update number of cards in the deck
+      deck.numberOfCards++;
     }
+    await deck.save();  // Save the updated deck with the correct card count
   }
 
   console.log("Seeding completed successfully.");
@@ -111,5 +93,6 @@ seed()
     console.error(e);
   })
   .finally(() => {
-    connection.close();
+    mongoose.connection.close();  // Close MongoDB connection
   });
+

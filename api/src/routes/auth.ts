@@ -3,9 +3,7 @@ import { Hono } from "hono";
 import { signInSchema, signUpSchema } from "../validators/schemas";
 import { hash, verify } from "@node-rs/argon2";
 import { HTTPException } from "hono/http-exception";
-import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { users } from "../db/schema";
+import { User } from "../db/models";
 import { lucia } from "../db/auth";
 import { Context } from "../lib/context";
 import { zCustomErrorMessage } from "../validators/zCustomError";
@@ -24,11 +22,7 @@ authRoutes.post("/sign-in", zValidator("json", signInSchema), async (c) => {
   const { username, password } = c.req.valid("json");
   console.log(username, password);
 
-  const user = await db
-    .select()
-    .from(users)
-    .where(eq(users.username, username))
-    .get();
+  const user = await User.findOne({ username }).exec();
 
   if (!user) {
     throw new HTTPException(401, {
@@ -44,7 +38,7 @@ authRoutes.post("/sign-in", zValidator("json", signInSchema), async (c) => {
     });
   }
 
-  const session = await lucia.createSession(user.id, {});
+  const session = await lucia.createSession(user._id.toString(), {});
   const sessionCookie = lucia.createSessionCookie(session.id);
   c.header("Set-Cookie", sessionCookie.serialize(), {
     append: true,
@@ -53,7 +47,7 @@ authRoutes.post("/sign-in", zValidator("json", signInSchema), async (c) => {
   return c.json({
     message: "You have been signed in!",
     user: {
-      id: user.id,
+      id: user._id,
       name: user.name,
       username: user.username,
     },
@@ -70,11 +64,9 @@ authRoutes.post(
   async (c) => {
     const { name, username, password } = c.req.valid("json");
     //checking is username already in use
-    const sameUserNameUsers = await db.query.users.findMany({
-      where: eq(users.username, username),
-    });
+    const existingUser = await User.findOne({ username }).exec();
 
-    if (sameUserNameUsers.length !== 0) {
+    if (existingUser) {
       throw new HTTPException(401, {
         message: "Username already in use, please try a different one",
       });
@@ -82,17 +74,13 @@ authRoutes.post(
 
     const passwordHash = await hash(password, hashOptions);
 
-    const newUser = await db
-      .insert(users)
-      .values({
-        username,
-        name,
-        password_hash: passwordHash,
-      })
-      .returning()
-      .get();
+    const newUser = await User.create({
+      username,
+      name,
+      password_hash: passwordHash,
+    });
 
-    const session = await lucia.createSession(newUser.id, {});
+    const session = await lucia.createSession(newUser._id.toString(), {});
     const sessionCookie = lucia.createSessionCookie(session.id);
     //console.log(sessionCookie)
     c.header("Set-Cookie", sessionCookie.serialize(), {
@@ -104,7 +92,7 @@ authRoutes.post(
         success: true,
         message: "You have been signed up!",
         user: {
-          id: newUser.id,
+          id: newUser._id,
           name: newUser.name,
           username: newUser.username,
         },
@@ -132,6 +120,7 @@ authRoutes.post("/sign-out", async (c) => {
 
 authRoutes.post("/validate-session", async (c) => {
   const cookie = c.req.header("Cookie") ?? "";
+  console.log(cookie)
   const sessionId = lucia.readSessionCookie(cookie);
   if (!sessionId) {
     return c.json({ success: false, message: "Session is not valid" });
