@@ -1,4 +1,4 @@
-import { DeckType, CardType, UserType } from "@/data/types";
+import { FormType, FieldType, UserType } from "@/data/types";
 import { atom } from "nanostores";
 import { persistentMap } from "@nanostores/persistent";
 import { logger } from "@nanostores/logger";
@@ -21,61 +21,61 @@ export function setPageLimit(limit: number) {
   $pageLimit.set(limit);
 }
 
-export const $totalDeckPages = atom<number>(1);
-export function setTotalDeckPages(pages: number) {
-  $totalDeckPages.set(pages);
+export const $totalFormPages = atom<number>(1);
+export function setTotalFormPages(pages: number) {
+  $totalFormPages.set(pages);
 }
 
-export const $totalDeckCount = atom<number>(1);
-export function setTotalDeckCount(decks: number) {
-  $totalDeckCount.set(decks);
+export const $totalFormCount = atom<number>(1);
+export function setTotalFormCount(forms: number) {
+  $totalFormCount.set(forms);
 }
-export function decrementDeckCount() {
-  $totalDeckCount.set($totalDeckCount.get() - 1);
+export function decrementFormCount() {
+  $totalFormCount.set($totalFormCount.get() - 1);
 }
-export function incrementDeckCount() {
-  $totalDeckCount.set($totalDeckCount.get() + 1);
-}
-
-export const $totalCardPages = atom<number>(1);
-export function setTotalCardPages(pages: number) {
-  $totalCardPages.set(pages);
+export function incrementFormCount() {
+  $totalFormCount.set($totalFormCount.get() + 1);
 }
 
-export const $totalCardCount = atom<number>(1);
-export function setTotalCardCount(cards: number) {
-  $totalCardCount.set(cards);
+export const $totalFieldPages = atom<number>(1);
+export function setTotalFieldPages(pages: number) {
+  $totalFieldPages.set(pages);
 }
-export function decrementCardCount() {
-  $totalCardCount.set($totalCardCount.get() - 1);
+
+export const $totalFieldCount = atom<number>(1);
+export function setTotalFieldCount(fields: number) {
+  $totalFieldCount.set(fields);
 }
-export function incrementCardCount() {
-  $totalCardCount.set($totalCardCount.get() + 1);
+export function decrementFieldCount() {
+  $totalFieldCount.set($totalFieldCount.get() - 1);
+}
+export function incrementFieldCount() {
+  $totalFieldCount.set($totalFieldCount.get() + 1);
 }
 
 //DECKS STATE MANAGEMENT
 
-export const $decks = atom<DeckType[]>([]);
+export const $forms = atom<FormType[]>([]);
 
-export function setDecks(posts: DeckType[]) {
-  $decks.set(posts);
+export function setForms(forms: FormType[]) {
+  $forms.set(forms);
 }
 
-export function addDeck(post: DeckType) {
-  $decks.set([post, ...$decks.get()]);
+export function addForm(form: FormType) {
+  $forms.set([form, ...$forms.get()]);
 }
 
-export function removeDeck(id: string) {
-  $decks.set($decks.get().filter((d) => d.id !== id));
+export function removeForm(id: string) {
+  $forms.set($forms.get().filter((f) => f.id !== id));
 }
 
-export function updateDeckTitle(id: string, title: string) {
-  $decks.set(
-    $decks.get().map((d) => {
-      if (d.id === id) {
-        return { ...d, title: title };
+export function updateFormTitle(id: string, title: string) {
+  $forms.set(
+    $forms.get().map((f) => {
+      if (f.id === id) {
+        return { ...f, title: title };
       }
-      return d;
+      return f;
     }),
   );
 }
@@ -88,27 +88,28 @@ export function setDeckExists(exists: boolean) {
 
 //CARDS STATE MANAGEMENT
 
-export const $cards = atom<CardType[]>([]);
+export const $fields = atom<FieldType[]>([]);
 
-export function setCards(cards: CardType[]) {
-  $cards.set(cards);
+export function setFields(fields: FieldType[]) {
+  console.log(fields)
+  $fields.set(fields);
 }
 
-export function addCard(card: CardType) {
-  $cards.set([card, ...$cards.get()]);
+export function addField(field: FieldType) {
+  $fields.set([field, ...$fields.get()]);
 }
 
-export function removeCard(id: string) {
-  $cards.set($cards.get().filter((c) => c.id !== id));
+export function removeField(id: string) {
+  $fields.set($fields.get().filter((i) => i.id !== id));
 }
 
-export function updateCardContent(id: string, front: string, back: string) {
-  $cards.set(
-    $cards.get().map((c) => {
-      if (c.id === id) {
-        return { ...c, front: front, back: back };
+export function updateFieldContent(id: string, front: string, back: string) {
+  $fields.set(
+    $fields.get().map((i) => {
+      if (i.id === id) {
+        return { ...i, front: front, back: back };
       }
-      return c;
+      return i;
     }),
   );
 }
@@ -130,4 +131,4 @@ export function clearUser() {
   $user.set(defaultUser);
 }
 
-DEBUG && logger({ $decks, $currentPage, $cards });
+DEBUG && logger({ $forms, $currentPage, $fields });

@@ -1,4 +1,4 @@
-import { CardType } from "@/data/types";
+import { FieldType } from "@/data/types";
 import {
   DialogHeader,
   DialogContent,
@@ -11,31 +11,31 @@ import { Input } from "../ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { useEffect, useState } from "react";
-import useMutationCards from "@/hooks/use-mutation-cards";
+import useMutationFields from "@/hooks/use-mutation-fields";
 
-type EditCardDialogProps = {
-  card: CardType;
+type EditFieldDialogProps = {
+  field: FieldType;
   dialogType: string;
 };
 
-const EditDeleteCardDialog = ({ card, dialogType }: EditCardDialogProps) => {
-  const [editFrontText, setEditFrontText] = useState(card.front);
-  const [editBackText, setEditBackText] = useState(card.back);
-  const { updateCardContentById, deleteCardById } = useMutationCards(
-    card.deckId,
+const EditDeleteFieldDialog = ({ field, dialogType }: EditFieldDialogProps) => {
+  const [editFrontText, setEditFrontText] = useState(field.front);
+  const [editBackText, setEditBackText] = useState(field.back);
+  const { updateFieldContentById, deleteFieldById } = useMutationFields(
+    field.formId,
   );
 
   useEffect(() => {
-    if (card) {
-      card.front !== editFrontText && setEditFrontText(card.front);
-      card.back !== editBackText && setEditFrontText(card.back);
+    if (field) {
+      field.front !== editFrontText && setEditFrontText(field.front);
+      field.back !== editBackText && setEditFrontText(field.back);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card]);
+  }, [field]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    updateCardContentById(card.id, editFrontText, editBackText);
+    updateFieldContentById(field.id, editFrontText, editBackText);
   };
 
   if (dialogType === "Edit") {
@@ -45,9 +45,9 @@ const EditDeleteCardDialog = ({ card, dialogType }: EditCardDialogProps) => {
           <form onSubmit={handleSubmit} className="flex flex-col">
             <DialogHeader>
               <div>
-                <DialogTitle>Edit Card</DialogTitle>
+                <DialogTitle>Edit Field</DialogTitle>
                 <DialogDescription>
-                  Edit the front and back of your card here.
+                  Edit the front and back of your field here.
                 </DialogDescription>
               </div>
             </DialogHeader>
@@ -101,7 +101,7 @@ const EditDeleteCardDialog = ({ card, dialogType }: EditCardDialogProps) => {
               <DialogTitle>Are you absolutely sure?</DialogTitle>
               <DialogDescription>
                 This action cannot be undone. This will permanently delete your
-                card and remove it from the server.
+                field and remove it from the server.
               </DialogDescription>
             </div>
           </DialogHeader>
@@ -116,7 +116,7 @@ const EditDeleteCardDialog = ({ card, dialogType }: EditCardDialogProps) => {
               <DialogClose asChild>
                 <Button
                   variant="default"
-                  onClick={() => deleteCardById(card.id)}
+                  onClick={() => deleteFieldById(field.id)}
                 >
                   Continue
                 </Button>
@@ -129,4 +129,4 @@ const EditDeleteCardDialog = ({ card, dialogType }: EditCardDialogProps) => {
   }
 };
 
-export default EditDeleteCardDialog;
+export default EditDeleteFieldDialog;

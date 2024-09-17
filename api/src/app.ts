@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import decksRouter from "./routes/decks";
-import cardsRouter from "./routes/cards";
+import formsRouter from "./routes/forms";
+import fieldsRouter from "./routes/fields";
 import { HTTPException } from "hono/http-exception";
 import { cors } from "hono/cors";
 import authRoutes from "./routes/auth";
@@ -36,8 +36,8 @@ app.get("/", (c) => {
 });
 
 app.route("/", authRoutes);
-app.route("/", decksRouter);
-app.route("/", cardsRouter);
+app.route("/", formsRouter);
+app.route("/", fieldsRouter);
 
 app.onError((err, c) => {
   console.error(`${err}`);

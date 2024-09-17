@@ -1,8 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { hash } from "@node-rs/argon2";
-import { User, Deck, Card, Session } from "./models";  // Mongoose models
+import { User, Form, Field, Session } from "./models";  // Mongoose models
 import mongoose from "mongoose";
 import { connectToDatabase } from "./index";
+import { customAlphabet } from 'nanoid';
+const nanoid = customAlphabet('1234567890', 6);  // Creates a 10-character unique ID
+
 
 async function seed() {
   console.log("Connecting to the database...");
@@ -10,32 +13,17 @@ async function seed() {
   console.log("Seeding the database...");
 
   console.log("Cleaning existing data...");
-  await Card.deleteMany({});
-  await Deck.deleteMany({});
+  await Field.deleteMany({});
+  await Form.deleteMany({});
   await User.deleteMany({});
   await Session.deleteMany({});
 
   console.log("Inserting new seed data...");
 
-  const sampleKeywords = [
-    "technology",
-    "innovation",
-    "design",
-    "development",
-    "programming",
-    "software",
-    "hardware",
-    "AI",
-    "machine learning",
-    "data science",
-    "cloud computing",
-    "cybersecurity",
-  ];
-
   const sampleUsers = [];
   for (let i = 0; i <= 10; i++) {
     const user = new User({
-      _id: `id-${i}`,
+      _id: nanoid(),
       name: faker.person.fullName(),
       username: `user-${i}`,
       password_hash: await hash(`pass-${i}`),
@@ -44,44 +32,38 @@ async function seed() {
     sampleUsers.push(user);
   }
 
-  let numDecks = 100;
-  for (let i = 1; i <= numDecks; i++) {
-    const randomKeywords = faker.helpers.arrayElements(sampleKeywords, {
-      min: 1,
-      max: 3,
-    });
-    const title = `Deck ${i} ${randomKeywords.join(" ")} `;
+  let numForms = 100;
+  for (let i = 1; i <= numForms; i++) {
+    const title = `Form ${i}`;
     const randomUser = faker.helpers.arrayElement(sampleUsers);
 
-    const deck = new Deck({
+    const form = new Form({
+      _id: Number(nanoid()),
       title,
-      numberOfCards: 0,
+      numberOfFields: 0,
       date: faker.date.recent({ days: 5 }),
       userId: randomUser._id,  // Reference by ObjectId
     });
-    await deck.save();
+    await form.save();
 
-    const numCards = faker.number.int({ min: 3, max: 25 });
-    for (let j = 0; j < numCards; j++) {
-      const randomKeywords = faker.helpers.arrayElements(sampleKeywords, {
-        min: 1,
-        max: 3,
-      });
-      const front = `Card ${j} Front ${randomKeywords.join(" ")}`;
-      const back = `Back ${randomKeywords.join(" ")}`;
+    const numFields = faker.number.int({ min: 2, max: 10 });
+    for (let j = 0; j < numFields; j++) {
+      const front = `Field ${j} Front `;
+      const back = `Back`;
 
-      const card = new Card({
+      const field = new Field({
+        _id: Number(nanoid()),
         front,
         back,
         date: faker.date.recent({ days: 4.5 }),
-        deckId: deck._id,  // Reference by ObjectId
+        formId: form._id,  // Reference by ObjectId
       });
-      await card.save();
+      await field.save();
 
       // Update number of cards in the deck
-      deck.numberOfCards++;
+      form.numberOfFields++;
     }
-    await deck.save();  // Save the updated deck with the correct card count
+    await form.save();  // Save the updated deck with the correct card count
   }
 
   console.log("Seeding completed successfully.");

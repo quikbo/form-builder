@@ -1,4 +1,4 @@
-import { DeckType } from "@/data/types";
+import { FieldType } from "@/data/types";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -7,15 +7,15 @@ import {
 } from "../ui/dropdown-menu";
 import { Dialog, DialogTrigger } from "../ui/dialog";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import EditDeleteFieldDialog from "./edit-delete-field-dialogs";
 import { useState } from "react";
-import EditDeleteDeckDialog from "./edit-delete-deck-dialogs";
 import useAuth from "@/hooks/use-auth";
 
-type DeckActionsProps = {
-  deck: DeckType;
+type FieldActionsProps = {
+  field: FieldType;
 };
 
-const DeckActions = ({ deck }: DeckActionsProps) => {
+const FieldActions = ({ field }: FieldActionsProps) => {
   const [dialogType, setDialogType] = useState("Edit");
   const { validate } = useAuth();
 
@@ -24,7 +24,6 @@ const DeckActions = ({ deck }: DeckActionsProps) => {
       <Dialog>
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="flex justify-center items-center h-9 w-9 hover:bg-accent hover:text-accent-foreground"
             onClick={async () => {
               await validate();
             }}
@@ -32,33 +31,20 @@ const DeckActions = ({ deck }: DeckActionsProps) => {
             <DotsVerticalIcon />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DialogTrigger
-              asChild
-              onClick={async () => {
-                await validate();
-                setDialogType("Edit");
-              }}
-            >
-              <DropdownMenuItem>Edit Deck</DropdownMenuItem>
+            <DialogTrigger asChild onClick={() => setDialogType("Edit")}>
+              <DropdownMenuItem>Edit Field</DropdownMenuItem>
             </DialogTrigger>
-
-            <DialogTrigger
-              asChild
-              onClick={async () => {
-                await validate();
-                setDialogType("Delete");
-              }}
-            >
+            <DialogTrigger asChild onClick={() => setDialogType("Delete")}>
               <DropdownMenuItem className="text-red-600">
-                Delete Deck
+                Delete Field
               </DropdownMenuItem>
             </DialogTrigger>
           </DropdownMenuContent>
         </DropdownMenu>
-        <EditDeleteDeckDialog deck={deck} dialogType={dialogType} />
+        <EditDeleteFieldDialog field={field} dialogType={dialogType} />
       </Dialog>
     </div>
   );
 };
 
-export default DeckActions;
+export default FieldActions;

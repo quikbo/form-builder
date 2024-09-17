@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-//DECK SCHEMAS
-export const createDeckSchema = z.object({
+//FORM SCHEMAS
+export const createFormSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
@@ -12,9 +12,9 @@ export const createDeckSchema = z.object({
     ),
 });
 
-export const updateDeckSchema = createDeckSchema.partial();
+export const updateFormSchema = createFormSchema.partial();
 
-export const getDeckSchema = z.object({
+export const getFormSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
@@ -27,8 +27,8 @@ export const queryParamsSchema = z.object({
   username: z.string().optional(),
 });
 
-//CARD SCHEMAS
-export const createCardSchema = z.object({
+//FIELD SCHEMAS
+export const createFieldSchema = z.object({
   front: z
     .string()
     .min(1, "Front is required")
@@ -39,14 +39,14 @@ export const createCardSchema = z.object({
     .max(1000, "Back must be 1000 characters or less"),
 });
 
-export const updateCardSchema = createCardSchema.partial();
+export const updateFieldSchema = createFieldSchema.partial();
 
-export const getCardsSchema = z.object({
-  deck_id: z.coerce.number().int().positive(),
+export const getFieldsSchema = z.object({
+  form_id: z.coerce.number().int().positive(),
 });
 
-export const getCardSchema = z.object({
-  deck_id: z.coerce.number().int().positive(),
+export const getFieldSchema = z.object({
+  form_id: z.coerce.number().int().positive(),
   id: z.coerce.number().int().positive(),
 });
 

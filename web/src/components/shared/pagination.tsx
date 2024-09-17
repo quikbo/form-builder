@@ -10,8 +10,8 @@ import {
 import { $router } from "@/lib/router";
 import {
   $currentPage,
-  $totalCardPages,
-  $totalDeckPages,
+  $totalFieldPages,
+  $totalFormPages,
   setPage,
 } from "@/lib/store";
 import { useStore } from "@nanostores/react";
@@ -29,9 +29,9 @@ const Paginator = ({ children, loadPage }: PaginatorProps) => {
 
   let totalPages = 0;
   if (page.route === "home") {
-    totalPages = useStore($totalDeckPages);
+    totalPages = useStore($totalFormPages);
   } else {
-    totalPages = useStore($totalCardPages);
+    totalPages = useStore($totalFieldPages);
   }
 
   const [isActive, setIsActive] = useState<number>(1);

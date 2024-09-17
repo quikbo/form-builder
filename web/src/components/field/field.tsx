@@ -1,14 +1,14 @@
-import { CardType } from "@/data/types";
-import CardActions from "./card-actions";
+import { FieldType } from "@/data/types";
+import FieldActions from "./field-actions";
 import { useState } from "react";
 import Author from "../shared/author";
 import useAuth from "@/hooks/use-auth";
 
-type CardProps = {
-  card: CardType;
+type FieldProps = {
+  field: FieldType;
 };
 
-const Card = ({ card }: CardProps) => {
+const Field = ({ field }: FieldProps) => {
   const [flipState, setFlipState] = useState(false);
   const { user, validate } = useAuth();
 
@@ -37,7 +37,7 @@ const Card = ({ card }: CardProps) => {
 
   const setActionsStyleClass = () => {
     if (!flipState) {
-      //front of card
+      //front of field
       return "absolute top-14 right-5";
     } else {
       return "absolute top-14 left-5";
@@ -50,16 +50,16 @@ const Card = ({ card }: CardProps) => {
         <Author author={user} />
         <div className={setCardStyleClass()} onClick={toggleFlip}>
           <div className={setTextStyleClass()}>
-            {!flipState && card.front}
-            {flipState && card.back}
+            {!flipState && field.front}
+            {flipState && field.back}
           </div>
         </div>
         <div className={setActionsStyleClass()}>
-          <CardActions card={card} />
+          <FieldActions field={field} />
         </div>
       </div>
     </>
   );
 };
 
-export default Card;
+export default Field;

@@ -13,6 +13,7 @@ import useAuth from "./hooks/use-auth";
 function App() {
   const page = useStore($router);
   const { user } = useAuth();
+  //console.log(user)
   //const sessionValid = useStore($sessionValid);
 
   if (!page) {

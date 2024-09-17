@@ -1,36 +1,36 @@
 import {
-  $decks,
-  setDecks,
+  $forms,
+  setForms,
   setPageLimit,
-  setTotalDeckCount,
-  setTotalDeckPages,
+  setTotalFormCount,
+  setTotalFormPages,
 } from "@/lib/store";
 import { useStore } from "@nanostores/react";
 import { useEffect } from "react";
-import { fetchDecks } from "@/data/api";
+import { fetchForms } from "@/data/api";
 import { toast } from "@/components/ui/use-toast";
 
-const useQueryDecks = () => {
-  const decks = useStore($decks);
+const useQueryForms = () => {
+  const forms = useStore($forms);
 
-  const loadDecks = async (page: number = 1) => {
+  const loadForms = async (page: number = 1) => {
     try {
       const {
-        data: fetchedDecks,
-        totalDecks,
+        data: fetchedForms,
+        totalForms,
         totalPages,
         limit,
-      } = await fetchDecks(page);
+      } = await fetchForms(page);
       setPageLimit(limit);
-      setTotalDeckCount(totalDecks);
-      setTotalDeckPages(totalPages);
-      setDecks([...fetchedDecks]);
+      setTotalFormCount(totalForms);
+      setTotalFormPages(totalPages);
+      setForms([...fetchedForms]);
     } catch (error) {
       const errorMessage =
         (error as Error).message ?? "Please try again later!";
       toast({
         variant: "destructive",
-        title: "Sorry! There was an error reading the decks 🙁",
+        title: "Sorry! There was an error reading the forms 🙁",
         description: errorMessage,
       });
     } finally {
@@ -38,14 +38,14 @@ const useQueryDecks = () => {
   };
 
   useEffect(() => {
-    loadDecks();
+    loadForms();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
-    decks,
-    loadDecks,
+    forms,
+    loadForms: loadForms,
   };
 };
 
-export default useQueryDecks;
+export default useQueryForms;

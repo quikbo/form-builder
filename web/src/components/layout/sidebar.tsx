@@ -5,11 +5,11 @@ import {
 } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "../ui/dialog";
-import AddDeckDialog from "../deck/add-deck-dialog";
+import AddFormDialog from "../form/add-form-dialog";
 import { $router } from "@/lib/router";
 import { openPage } from "@nanostores/router";
 import { useStore } from "@nanostores/react";
-import AddCardDialog from "../card/add-card-dialog";
+import AddFieldDialog from "../field/add-field-dialog";
 import useAuth from "@/hooks/use-auth";
 
 const Sidebar = () => {
@@ -58,21 +58,21 @@ const Sidebar = () => {
               <PlusCircledIcon className="w-5 h-5" />
             </Button>
           </DialogTrigger>
-          <AddDeckDialog />
+          <AddFormDialog />
         </Dialog>
       )}
-      {page.route === "deck" && (
+      {page.route === "form" && (
         <Dialog>
           <DialogTrigger asChild>
             <Button
-              aria-label={"Make a Deck"}
+              aria-label={"Make a Form"}
               variant="destructive"
               size="icon"
             >
               <PlusCircledIcon className="w-5 h-5" />
             </Button>
           </DialogTrigger>
-          <AddCardDialog deckId={page.params.deckId} />
+          <AddFieldDialog formId={page.params.formId} />
         </Dialog>
       )}
     </div>

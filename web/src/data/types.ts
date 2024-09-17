@@ -1,18 +1,17 @@
-export type DeckType = {
+export type FormType = {
   id: string;
   title: string;
-  numberOfCards: string;
+  numberOfFields: string;
   date: string;
-  author: UserType;
+  userId: UserType;
 };
 
-export type CardType = {
+export type FieldType = {
   id: string;
   front: string;
   back: string;
   date: string;
-  deckId: string;
-  author: UserType;
+  formId: string;
 };
 
 export type UserType = {

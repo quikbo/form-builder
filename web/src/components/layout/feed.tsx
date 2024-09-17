@@ -1,6 +1,6 @@
 import Header from "./header";
-import Decks from "../deck/decks";
-import Cards from "../card/cards";
+import Forms from "../form/forms";
+import Fields from "../field/fields";
 import { useStore } from "@nanostores/react";
 import { $router } from "@/lib/router";
 
@@ -14,14 +14,14 @@ const Feed = () => {
     return (
       <div className="flex flex-col w-full min-h-screen border-x">
         <Header />
-        <Decks />
+        <Forms />
       </div>
     );
-  } else if (page.route === "deck") {
+  } else if (page.route === "form") {
     return (
       <div className="flex flex-col w-full min-h-screen border-x">
         <Header />
-        <Cards deckId={page.params.deckId} />
+        <Fields formId={page.params.formId} />
       </div>
     );
   }

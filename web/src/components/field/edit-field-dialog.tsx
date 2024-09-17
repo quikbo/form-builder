@@ -1,4 +1,4 @@
-import { CardType } from "@/data/types";
+import { FieldType } from "@/data/types";
 import {
   DialogHeader,
   DialogContent,
@@ -11,13 +11,13 @@ import { Input } from "../ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { useEffect, useState } from "react";
-import useMutationCards from "@/hooks/use-mutation-cards";
+import useMutationFields from "@/hooks/use-mutation-fields";
 
-type EditCardDialogProps = {
-  card: CardType;
+type EditFieldDialogProps = {
+  card: FieldType;
 };
 
-const EditCardDialog = ({ card }: EditCardDialogProps) => {
+const EditFieldDialog = ({ card }: EditFieldDialogProps) => {
   const [editFrontText, setEditFrontText] = useState(card.front);
   const [editBackText, setEditBackText] = useState(card.back);
 
@@ -29,11 +29,11 @@ const EditCardDialog = ({ card }: EditCardDialogProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [card]);
 
-  const { updateCardContentById } = useMutationCards(card.id);
+  const { updateFieldContentById } = useMutationFields(card.id);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    updateCardContentById(card.id, editFrontText, editBackText);
+    updateFieldContentById(card.id, editFrontText, editBackText);
   };
 
   return (
@@ -90,4 +90,4 @@ const EditCardDialog = ({ card }: EditCardDialogProps) => {
   );
 };
 
-export default EditCardDialog;
+export default EditFieldDialog;

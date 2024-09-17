@@ -7,6 +7,7 @@ import { User } from "../db/models";
 import { lucia } from "../db/auth";
 import { Context } from "../lib/context";
 import { zCustomErrorMessage } from "../validators/zCustomError";
+import { v4 as uuidv4 } from "uuid";
 
 const authRoutes = new Hono<Context>();
 
@@ -75,8 +76,9 @@ authRoutes.post(
     const passwordHash = await hash(password, hashOptions);
 
     const newUser = await User.create({
-      username,
+      _id: uuidv4(),
       name,
+      username,
       password_hash: passwordHash,
     });
 

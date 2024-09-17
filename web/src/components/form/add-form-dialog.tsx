@@ -10,16 +10,16 @@ import { Input } from "../ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { useState } from "react";
-import useMutationDecks from "@/hooks/use-mutation-decks";
+import useMutationForms from "@/hooks/use-mutation-forms";
 
-const AddDeckDialog = () => {
+const AddFormDialog = () => {
   const [addFormData, setAddFormData] = useState("");
-  const { addNewDeck } = useMutationDecks();
+  const { addNewForm } = useMutationForms();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const newTitle = addFormData;
-    addNewDeck(newTitle);
+    addNewForm(newTitle);
     setAddFormData("");
   };
 
@@ -29,9 +29,9 @@ const AddDeckDialog = () => {
         <form onSubmit={handleSubmit} className="flex flex-col">
           <DialogHeader>
             <div>
-              <DialogTitle>Add Deck</DialogTitle>
+              <DialogTitle>Add Form</DialogTitle>
               <DialogDescription>
-                Enter the title of your deck here.
+                Enter the title of your form here.
               </DialogDescription>
             </div>
           </DialogHeader>
@@ -66,4 +66,4 @@ const AddDeckDialog = () => {
   );
 };
 
-export default AddDeckDialog;
+export default AddFormDialog;

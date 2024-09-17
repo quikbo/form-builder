@@ -1,24 +1,24 @@
-import { DeckType } from "@/data/types";
-import DeckActions from "./deck-actions";
+import { FormType } from "@/data/types";
+import FormActions from "./form-actions";
 import { openPage } from "@nanostores/router";
 import { $router } from "@/lib/router";
 import { setPage } from "@/lib/store";
 import Author from "../shared/author";
 import useAuth from "@/hooks/use-auth";
 
-type DeckProps = {
-  deck: DeckType;
+type FormProps = {
+  form: FormType;
 };
 
 //REFACTOR TO BEING ABLE TO JUST CLICK DECK TO OPEN IT RATHER THAN USING BUTTON
-const Deck = ({ deck }: DeckProps) => {
+const Form = ({ form }: FormProps) => {
   const { validate } = useAuth();
 
   const navigateToCardsView = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     await validate();
     setPage(1);
-    openPage($router, "deck", { deckId: deck.id });
+    openPage($router, "form", { formId: form.id });
   };
 
   return (
@@ -29,14 +29,14 @@ const Deck = ({ deck }: DeckProps) => {
       >
         <div className="flex justify-between p1-4">
           <div className="py-4 cursor-pointer" onClick={navigateToCardsView}>
-            <div className="text-xl font-bold">{deck.title}</div>
+            <div className="text-xl font-bold">{form.title}</div>
             <div className="text-s text-gray-600">
-              {deck.numberOfCards} Cards
+              {form.numberOfFields} Fields
             </div>
             <div className="h-40"></div>
             <div>
               <h4 className="text-s text-gray-600">
-                {new Date(deck.date).toLocaleString("en-US", {
+                {new Date(form.date).toLocaleString("en-US", {
                   month: "short",
                   day: "numeric",
                   year: "numeric",
@@ -44,11 +44,11 @@ const Deck = ({ deck }: DeckProps) => {
                   minute: "numeric",
                 })}
               </h4>
-              <Author author={deck.author} />
+              <Author author={form.userId} />
             </div>
           </div>
           <div className="top-0 right-0">
-            <DeckActions deck={deck} />
+            <FormActions form={form} />
           </div>
         </div>
       </div>
@@ -56,4 +56,4 @@ const Deck = ({ deck }: DeckProps) => {
   );
 };
 
-export default Deck;
+export default Form;

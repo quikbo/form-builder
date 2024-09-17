@@ -1,4 +1,4 @@
-import { CardType } from "@/data/types";
+import { FormType } from "@/data/types";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -7,15 +7,15 @@ import {
 } from "../ui/dropdown-menu";
 import { Dialog, DialogTrigger } from "../ui/dialog";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
-import EditDeleteCardDialog from "./edit-delete-card-dialogs";
 import { useState } from "react";
+import EditDeleteFormDialog from "./edit-delete-form-dialogs";
 import useAuth from "@/hooks/use-auth";
 
-type CardActionsProps = {
-  card: CardType;
+type FormActionsProps = {
+  form: FormType;
 };
 
-const CardActions = ({ card }: CardActionsProps) => {
+const FormActions = ({ form }: FormActionsProps) => {
   const [dialogType, setDialogType] = useState("Edit");
   const { validate } = useAuth();
 
@@ -24,6 +24,7 @@ const CardActions = ({ card }: CardActionsProps) => {
       <Dialog>
         <DropdownMenu>
           <DropdownMenuTrigger
+            className="flex justify-center items-center h-9 w-9 hover:bg-accent hover:text-accent-foreground"
             onClick={async () => {
               await validate();
             }}
@@ -31,20 +32,33 @@ const CardActions = ({ card }: CardActionsProps) => {
             <DotsVerticalIcon />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DialogTrigger asChild onClick={() => setDialogType("Edit")}>
-              <DropdownMenuItem>Edit Card</DropdownMenuItem>
+            <DialogTrigger
+              asChild
+              onClick={async () => {
+                await validate();
+                setDialogType("Edit");
+              }}
+            >
+              <DropdownMenuItem>Edit Form</DropdownMenuItem>
             </DialogTrigger>
-            <DialogTrigger asChild onClick={() => setDialogType("Delete")}>
+
+            <DialogTrigger
+              asChild
+              onClick={async () => {
+                await validate();
+                setDialogType("Delete");
+              }}
+            >
               <DropdownMenuItem className="text-red-600">
-                Delete Card
+                Delete Form
               </DropdownMenuItem>
             </DialogTrigger>
           </DropdownMenuContent>
         </DropdownMenu>
-        <EditDeleteCardDialog card={card} dialogType={dialogType} />
+        <EditDeleteFormDialog form={form} dialogType={dialogType} />
       </Dialog>
     </div>
   );
 };
 
-export default CardActions;
+export default FormActions;

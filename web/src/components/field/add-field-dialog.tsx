@@ -10,16 +10,16 @@ import { Input } from "../ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { useState } from "react";
-import useMutationCards from "@/hooks/use-mutation-cards";
+import useMutationFields from "@/hooks/use-mutation-fields";
 
-const AddCardDialog = ({ deckId }: { deckId: string }) => {
+const AddFieldDialog = ({ formId }: { formId: string }) => {
   const [frontText, setFrontText] = useState("");
   const [backText, setBackText] = useState("");
-  const { addNewCard } = useMutationCards(deckId);
+  const { addNewField } = useMutationFields(formId);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    addNewCard(frontText, backText);
+    addNewField(frontText, backText);
     setFrontText("");
   };
 
@@ -29,9 +29,9 @@ const AddCardDialog = ({ deckId }: { deckId: string }) => {
         <form onSubmit={handleSubmit} className="flex flex-col">
           <DialogHeader>
             <div>
-              <DialogTitle>Add Card</DialogTitle>
+              <DialogTitle>Add Field</DialogTitle>
               <DialogDescription>
-                Enter the front and back of your card here.
+                Enter the front and back of your field here.
               </DialogDescription>
             </div>
           </DialogHeader>
@@ -41,7 +41,7 @@ const AddCardDialog = ({ deckId }: { deckId: string }) => {
             </Label>
             <Input
               id="edit"
-              placeholder="Enter front of card ..."
+              placeholder="Enter front of field ..."
               defaultValue={frontText}
               onChange={(e) => setFrontText(e.target.value)}
             ></Input>
@@ -52,7 +52,7 @@ const AddCardDialog = ({ deckId }: { deckId: string }) => {
             </Label>
             <Input
               id="edit"
-              placeholder="Enter Back of card ..."
+              placeholder="Enter Back of field ..."
               defaultValue={backText}
               onChange={(e) => setBackText(e.target.value)}
             ></Input>
@@ -77,4 +77,4 @@ const AddCardDialog = ({ deckId }: { deckId: string }) => {
   );
 };
 
-export default AddCardDialog;
+export default AddFieldDialog;

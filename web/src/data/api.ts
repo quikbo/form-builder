@@ -1,38 +1,38 @@
 import { API_URL } from "@/env.ts";
-import { DeckType, CardType, UserType } from "./types";
+import { FormType, FieldType, UserType } from "./types";
 
-//DECKS API
+//FORMS API
 
-export const fetchDecks = async (
+export const fetchForms = async (
   page: number = 1,
   limit: number = 10,
   sort: string = "desc",
 ): Promise<{
-  data: DeckType[];
-  totalDecks: number;
+  data: FormType[];
+  totalForms: number;
   totalPages: number;
   limit: number;
 }> => {
   const response = await fetch(
-    `${API_URL}/decks?page=${page}&limit=${limit}&sort=${sort}`,
+    `${API_URL}/forms?page=${page}&limit=${limit}&sort=${sort}`,
     {
       credentials: "include",
     },
   );
   if (!response.ok) {
     throw new Error(
-      `Read Deck API request failed with code: ${response.status}`,
+      `Read Form API request failed with code: ${response.status}`,
     );
   }
   const responseJSON = await response.json();
   const data = responseJSON.data;
-  const totalDecks = responseJSON.meta.totalCount;
+  const totalForms = responseJSON.meta.totalCount;
   const totalPages = responseJSON.meta.totalPages;
-  return { data, totalDecks, totalPages, limit };
+  return { data, totalForms, totalPages, limit };
 };
 
-export const deleteDeck = async (id: string): Promise<DeckType> => {
-  const response = await fetch(`${API_URL}/decks/${id}`, {
+export const deleteForm = async (id: string): Promise<FormType> => {
+  const response = await fetch(`${API_URL}/forms/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -43,18 +43,18 @@ export const deleteDeck = async (id: string): Promise<DeckType> => {
   return responseJSON.data;
 };
 
-export const createDeck = async (
+export const createForm = async (
   title: string,
-  numberOfCards: number,
-): Promise<DeckType> => {
-  const response = await fetch(`${API_URL}/decks`, {
+  numberOfFields: number,
+): Promise<FormType> => {
+  const response = await fetch(`${API_URL}/forms`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       title,
-      numberOfCards,
+      numberOfFields,
     }),
     credentials: "include",
   });
@@ -65,11 +65,11 @@ export const createDeck = async (
   return responseJSON.data;
 };
 
-export const updateDeck = async (
+export const updateForm = async (
   id: string,
   title: string,
-): Promise<DeckType> => {
-  const response = await fetch(`${API_URL}/decks/${id}`, {
+): Promise<FormType> => {
+  const response = await fetch(`${API_URL}/forms/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -88,19 +88,19 @@ export const updateDeck = async (
 
 //CARDS API
 
-export const fetchCards = async (
-  deckId: string,
+export const fetchFields = async (
+  formId: string,
   page: number = 1,
   limit: number = 10,
 ): Promise<{
-  data: CardType[];
-  totalCards: number;
+  data: FieldType[];
+  totalFields: number;
   totalPages: number;
   limit: number;
   success: boolean;
 }> => {
   const response = await fetch(
-    `${API_URL}/decks/${deckId}/cards?page=${page}&limit=${limit}`,
+    `${API_URL}/forms/${formId}/fields?page=${page}&limit=${limit}`,
     {
       credentials: "include",
     },
@@ -110,17 +110,17 @@ export const fetchCards = async (
     throw new Error(`${responseJSON.message}`);
   }
   const data = responseJSON.data;
-  const totalCards = responseJSON.meta.totalCount;
+  const totalFields = responseJSON.meta.totalCount;
   const totalPages = responseJSON.meta.totalPages;
   const success = responseJSON.success;
-  return { data, totalCards, totalPages, limit, success };
+  return { data, totalFields, totalPages, limit, success };
 };
 
-export const deleteCard = async (
-  deckId: string,
-  cardId: string,
-): Promise<CardType> => {
-  const response = await fetch(`${API_URL}/decks/${deckId}/cards/${cardId}`, {
+export const deleteField = async (
+  formId: string,
+  fieldId: string,
+): Promise<FieldType> => {
+  const response = await fetch(`${API_URL}/forms/${formId}/fields/${fieldId}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -131,12 +131,12 @@ export const deleteCard = async (
   return responseJSON.data;
 };
 
-export const createCard = async (
-  deckId: string,
+export const createField = async (
+  formId: string,
   front: string,
   back: string,
-): Promise<CardType> => {
-  const response = await fetch(`${API_URL}/decks/${deckId}/cards`, {
+): Promise<FieldType> => {
+  const response = await fetch(`${API_URL}/forms/${formId}/fields`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -154,13 +154,13 @@ export const createCard = async (
   return responseJSON.data;
 };
 
-export const updateCard = async (
-  deckId: string,
-  cardId: string,
+export const updateField = async (
+  formId: string,
+  fieldId: string,
   front: string,
   back: string,
-): Promise<CardType> => {
-  const response = await fetch(`${API_URL}/decks/${deckId}/cards/${cardId}`, {
+): Promise<FieldType> => {
+  const response = await fetch(`${API_URL}/forms/${formId}/fields/${fieldId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

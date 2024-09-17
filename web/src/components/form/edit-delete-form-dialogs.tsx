@@ -1,4 +1,4 @@
-import { DeckType } from "@/data/types";
+import { FormType } from "@/data/types";
 import {
   DialogHeader,
   DialogContent,
@@ -11,28 +11,28 @@ import { Input } from "../ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "../ui/label";
 import { useEffect, useState } from "react";
-import useMutationDecks from "@/hooks/use-mutation-decks";
+import useMutationForms from "@/hooks/use-mutation-forms";
 
-type EditDeckDialogProps = {
-  deck: DeckType;
+type EditFormDialogProps = {
+  form: FormType;
   dialogType: string;
 };
 
-const EditDeleteDeckDialog = ({ deck, dialogType }: EditDeckDialogProps) => {
-  const [editFormData, setEditFormData] = useState(deck.title);
-  const { updateDeckTitleById, deleteDeckById } = useMutationDecks();
+const EditDeleteFormDialog = ({ form, dialogType }: EditFormDialogProps) => {
+  const [editFormData, setEditFormData] = useState(form.title);
+  const { updateFormTitleById, deleteFormById } = useMutationForms();
 
   useEffect(() => {
-    if (deck && deck.title !== editFormData) {
-      setEditFormData(deck.title);
+    if (form && form.title !== editFormData) {
+      setEditFormData(form.title);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deck]);
+  }, [form]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const newTitle = editFormData;
-    updateDeckTitleById(deck.id, newTitle);
+    updateFormTitleById(form.id, newTitle);
   };
 
   if (dialogType === "Edit") {
@@ -42,9 +42,9 @@ const EditDeleteDeckDialog = ({ deck, dialogType }: EditDeckDialogProps) => {
           <form onSubmit={handleSubmit} className="flex flex-col">
             <DialogHeader>
               <div>
-                <DialogTitle>Edit Deck</DialogTitle>
+                <DialogTitle>Edit Form</DialogTitle>
                 <DialogDescription>
-                  Edit the title of your deck here.
+                  Edit the title of your form here.
                 </DialogDescription>
               </div>
             </DialogHeader>
@@ -87,7 +87,7 @@ const EditDeleteDeckDialog = ({ deck, dialogType }: EditDeckDialogProps) => {
               <DialogTitle>Are you absolutely sure?</DialogTitle>
               <DialogDescription>
                 This action cannot be undone. This will permanently delete your
-                deck and associated cards from our server.
+                form and associated fields from our server.
               </DialogDescription>
             </div>
           </DialogHeader>
@@ -102,7 +102,7 @@ const EditDeleteDeckDialog = ({ deck, dialogType }: EditDeckDialogProps) => {
               <DialogClose asChild>
                 <Button
                   variant="default"
-                  onClick={() => deleteDeckById(deck.id)}
+                  onClick={() => deleteFormById(form.id)}
                 >
                   Continue
                 </Button>
@@ -115,4 +115,4 @@ const EditDeleteDeckDialog = ({ deck, dialogType }: EditDeckDialogProps) => {
   }
 };
 
-export default EditDeleteDeckDialog;
+export default EditDeleteFormDialog;

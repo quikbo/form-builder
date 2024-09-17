@@ -7,7 +7,7 @@ type Z = {
   data:
     | { id: number }
     | { front?: string; back?: string }
-    | { deck_id: number }
+    | { form_id: number }
     | { title?: string }
     | { sort?: "asc" | "desc"; search?: string; page?: number; limit?: number }
     | { username: string; password: string; name: string };
