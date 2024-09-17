@@ -133,8 +133,10 @@ export const deleteField = async (
 
 export const createField = async (
   formId: string,
-  front: string,
-  back: string,
+  label: string, // Represents the question label
+  type: "text" | "multiple_choice" | "checkbox" | "dropdown",
+  required: boolean,
+  options?: string[],
 ): Promise<FieldType> => {
   const response = await fetch(`${API_URL}/forms/${formId}/fields`, {
     method: "POST",
@@ -142,8 +144,10 @@ export const createField = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      front,
-      back,
+      label,
+      type,
+      required,
+      options,
     }),
     credentials: "include",
   });
@@ -157,8 +161,10 @@ export const createField = async (
 export const updateField = async (
   formId: string,
   fieldId: string,
-  front: string,
-  back: string,
+  label?: string, // Represents the question label
+  type?: "text" | "multiple_choice" | "checkbox" | "dropdown",
+  required?: boolean,
+  options?: string[],
 ): Promise<FieldType> => {
   const response = await fetch(`${API_URL}/forms/${formId}/fields/${fieldId}`, {
     method: "PATCH",
@@ -166,8 +172,10 @@ export const updateField = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      front,
-      back,
+      label,
+      type,
+      required,
+      options,
     }),
     credentials: "include",
   });

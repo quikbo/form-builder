@@ -4,6 +4,34 @@ import { ZodError } from "zod";
 type Z = {
   success: false;
   error: ZodError<any>;
+  data: any;
+};
+
+export const zCustomErrorMessage = (zError: Z, c: Context) => {
+  // Create an array of error messages for all issues
+  const errorMessages = zError.error.issues.map((issue) => ({
+    path: issue.path.join("."),
+    message: issue.message,
+  }));
+
+  return c.json(
+    {
+      success: zError.success,
+      message: "Validation error",
+      errors: errorMessages, // Include all error messages in the response
+      meta: zError.error,
+    },
+    400,
+  );
+};
+
+/*
+import { Context } from "hono";
+import { ZodError } from "zod";
+
+type Z = {
+  success: false;
+  error: ZodError<any>;
   data:
     | { id: number }
     | { front?: string; back?: string }
@@ -23,3 +51,4 @@ export const zCustomErrorMessage = (zError: Z, c: Context) => {
     400,
   );
 };
+*/

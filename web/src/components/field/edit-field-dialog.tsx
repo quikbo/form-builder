@@ -89,5 +89,3 @@ const EditFieldDialog = ({ card }: EditFieldDialogProps) => {
     </div>
   );
 };
-
-export default EditFieldDialog;

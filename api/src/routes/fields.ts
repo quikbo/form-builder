@@ -6,14 +6,16 @@ import {
   getFieldSchema,
   getFieldsSchema,
   queryParamsSchema,
+  refinedCreateFieldSchema,
+  refinedUpdateFieldSchema,
   updateFieldSchema,
 } from "../validators/schemas";
 import { HTTPException } from "hono/http-exception";
 import { zCustomErrorMessage } from "../validators/zCustomError";
 import { authGuard } from "../middlewares/auth-guard";
 import { Context } from "../lib/context";
-import { customAlphabet } from 'nanoid';
-const nanoid = customAlphabet('1234567890', 6);
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890", 6);
 
 const fieldsRouter = new Hono<Context>();
 
@@ -46,7 +48,12 @@ fieldsRouter.get(
   }),
   async (c) => {
     const { form_id } = c.req.valid("param");
-    const { sort = "asc", search = "", page = 1, limit = 10 } = c.req.valid("query");
+    const {
+      sort = "asc",
+      search = "",
+      page = 1,
+      limit = 10,
+    } = c.req.valid("query");
 
     // Find the form and ensure the user is authorized to access it
     const form = await Form.findById(form_id);
@@ -65,10 +72,7 @@ fieldsRouter.get(
       formId: form_id,
     };
     if (search) {
-      fieldQuery["$or"] = [
-        { front: { $regex: search, $options: "i" } },
-        { back: { $regex: search, $options: "i" } },
-      ];
+      fieldQuery["label"] = { $regex: search, $options: "i" };
     }
 
     // Handle sorting
@@ -82,13 +86,12 @@ fieldsRouter.get(
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
-    
-    const modifiedFieldsData = fieldsData.map(field => ({
+
+    const modifiedFieldsData = fieldsData.map((field) => ({
       ...field,
-      id: field._id,  // Create `id` field from `_id`
-      _id: undefined,  // Remove the `_id` field
-    }));  
-    
+      id: field._id, // Create `id` field from `_id`
+      _id: undefined, // Remove the `_id` field
+    }));
 
     const totalCount = await Field.countDocuments(fieldQuery);
 
@@ -103,7 +106,7 @@ fieldsRouter.get(
         totalCount,
       },
     });
-  }
+  },
 );
 
 // GET a specific field from a specific form
@@ -141,7 +144,7 @@ fieldsRouter.get(
       message: "Field retrieved successfully",
       data: field,
     });
-  }
+  },
 );
 
 // DELETE a specific field from a specific form
@@ -182,14 +185,14 @@ fieldsRouter.delete(
       message: "Field deleted successfully",
       data: field,
     });
-  }
+  },
 );
 
 // POST route to add a field to a form
 fieldsRouter.post(
   "/forms/:form_id/fields",
   authGuard,
-  zValidator("json", createFieldSchema, (result, c) => {
+  zValidator("json", refinedCreateFieldSchema, (result, c) => {
     if (!result.success) {
       return zCustomErrorMessage(result, c);
     }
@@ -214,13 +217,24 @@ fieldsRouter.post(
       });
     }
 
-    const { front, back } = c.req.valid("json");
+    const { label, type, required, options } = c.req.valid("json");
+
+    let fieldOptions = undefined;
+    if (
+      type === "multiple_choice" ||
+      type === "dropdown" ||
+      type === "checkbox"
+    ) {
+      fieldOptions = options || [];
+    }
 
     // Create the new field
     const newField = await Field.create({
       _id: Number(nanoid()),
-      front,
-      back,
+      label,
+      type,
+      required,
+      options: fieldOptions,
       date: new Date(),
       formId: form_id,
     });
@@ -234,16 +248,16 @@ fieldsRouter.post(
         message: "Field created successfully",
         data: newField,
       },
-      201
+      201,
     );
-  }
+  },
 );
 
 // PATCH route to update a field
 fieldsRouter.patch(
   "/forms/:form_id/fields/:id",
   authGuard,
-  zValidator("json", updateFieldSchema, (result, c) => {
+  zValidator("json", refinedUpdateFieldSchema, (result, c) => {
     if (!result.success) {
       return zCustomErrorMessage(result, c);
     }
@@ -254,7 +268,7 @@ fieldsRouter.patch(
     }
   }),
   async (c) => {
-    const { front, back } = c.req.valid("json");
+    const { label, type, required, options } = c.req.valid("json");
     const { form_id, id } = c.req.valid("param");
 
     const user = c.get("user");
@@ -270,11 +284,20 @@ fieldsRouter.patch(
       });
     }
 
+    let fieldOptions = undefined;
+    if (
+      type === "multiple_choice" ||
+      type === "dropdown" ||
+      type === "checkbox"
+    ) {
+      fieldOptions = options || [];
+    }
+
     // Find and update the field
     const updatedField = await Field.findOneAndUpdate(
       { _id: id, formId: form_id },
-      { front, back },
-      { new: true }
+      { label, type, required, options: fieldOptions },
+      { new: true },
     );
 
     if (!updatedField) {
@@ -286,7 +309,7 @@ fieldsRouter.patch(
       message: "Field updated successfully",
       data: updatedField,
     });
-  }
+  },
 );
 
 export default fieldsRouter;

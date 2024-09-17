@@ -8,8 +8,10 @@ export type FormType = {
 
 export type FieldType = {
   id: string;
-  front: string;
-  back: string;
+  label: string; // Represents the question label
+  type: "text" | "multiple_choice" | "checkbox" | "dropdown";
+  required: boolean;
+  options?: string[];
   date: string;
   formId: string;
 };

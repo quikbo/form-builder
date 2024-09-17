@@ -1,6 +1,7 @@
 import {
   addForm,
   decrementFormCount,
+  incrementFormCount,
   removeForm,
   updateFormTitle,
 } from "@/lib/store";
@@ -62,6 +63,7 @@ const useMutationForms = () => {
         },
       };
       addForm(formWithAuthor);
+      incrementFormCount();
     } catch (error) {
       toast({
         variant: "destructive",

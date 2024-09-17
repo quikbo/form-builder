@@ -41,7 +41,7 @@ const AddFormDialog = () => {
             </Label>
             <Input
               id="edit"
-              placeholder="Enter deck title ..."
+              placeholder="Enter form title ..."
               defaultValue={addFormData}
               onChange={(e) => setAddFormData(e.target.value)}
             ></Input>

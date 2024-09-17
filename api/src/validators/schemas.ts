@@ -29,17 +29,52 @@ export const queryParamsSchema = z.object({
 
 //FIELD SCHEMAS
 export const createFieldSchema = z.object({
-  front: z
+  label: z
     .string()
-    .min(1, "Front is required")
-    .max(500, "Front must be 500 characters or less"),
-  back: z
-    .string()
-    .min(1, "Back is required")
-    .max(1000, "Back must be 1000 characters or less"),
+    .min(1, "Label is required")
+    .max(500, "Label must be 500 characters or less"),
+  type: z.enum(["text", "multiple_choice", "checkbox", "dropdown"]),
+  required: z.boolean(),
+  options: z
+    .array(z.string().min(1, "Option must be at least 1 character"))
+    .optional(),
 });
 
+// Update field schema by making it partial before adding refinement
 export const updateFieldSchema = createFieldSchema.partial();
+
+// Apply refinement to both create and update schemas
+const fieldSchemaWithRefinement = createFieldSchema.refine(
+  (data) => {
+    if (["multiple_choice", "checkbox", "dropdown"].includes(data.type)) {
+      return data.options && data.options.length > 0;
+    }
+    return true; // If type is not one of the listed, no need for options
+  },
+  {
+    message:
+      "Options are required for multiple choice, checkbox, or dropdown fields",
+    path: ["options"], // Attach error to the options field
+  },
+);
+
+// Use the schema with refinement for field creation
+export const refinedCreateFieldSchema = fieldSchemaWithRefinement;
+
+// Use the schema with refinement for field updates
+export const refinedUpdateFieldSchema = updateFieldSchema.refine(
+  (data) => {
+    if (["multiple_choice", "checkbox", "dropdown"].includes(data.type!)) {
+      return data.options && data.options.length > 0;
+    }
+    return true;
+  },
+  {
+    message:
+      "Options are required for multiple choice, checkbox, or dropdown fields",
+    path: ["options"],
+  },
+);
 
 export const getFieldsSchema = z.object({
   form_id: z.coerce.number().int().positive(),

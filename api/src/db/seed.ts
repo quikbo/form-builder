@@ -1,11 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { hash } from "@node-rs/argon2";
-import { User, Form, Field, Session } from "./models";  // Mongoose models
+import { User, Form, Field, Session } from "./models"; // Mongoose models
 import mongoose from "mongoose";
 import { connectToDatabase } from "./index";
-import { customAlphabet } from 'nanoid';
-const nanoid = customAlphabet('1234567890', 6);  // Creates a 10-character unique ID
-
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890", 6); // Creates a 10-character unique ID
 
 async function seed() {
   console.log("Connecting to the database...");
@@ -28,7 +27,7 @@ async function seed() {
       username: `user-${i}`,
       password_hash: await hash(`pass-${i}`),
     });
-    await user.save();  // Save each user to the database
+    await user.save(); // Save each user to the database
     sampleUsers.push(user);
   }
 
@@ -42,28 +41,49 @@ async function seed() {
       title,
       numberOfFields: 0,
       date: faker.date.recent({ days: 5 }),
-      userId: randomUser._id,  // Reference by ObjectId
+      userId: randomUser._id, // Reference by ObjectId
     });
     await form.save();
 
     const numFields = faker.number.int({ min: 2, max: 10 });
     for (let j = 0; j < numFields; j++) {
-      const front = `Field ${j} Front `;
-      const back = `Back`;
+      const label = `Field ${j} Label`;
+
+      // Randomly determine the field type and generate options if applicable
+      const fieldType = faker.helpers.arrayElement([
+        "text",
+        "multiple_choice",
+        "checkbox",
+        "dropdown",
+      ]);
+
+      let options = undefined;
+      if (
+        fieldType === "multiple_choice" ||
+        fieldType === "checkbox" ||
+        fieldType === "dropdown"
+      ) {
+        options = Array.from(
+          { length: faker.number.int({ min: 2, max: 5 }) },
+          () => faker.word.noun(),
+        );
+      }
 
       const field = new Field({
         _id: Number(nanoid()),
-        front,
-        back,
+        label, // Use label instead of front/back
+        type: fieldType,
+        required: faker.datatype.boolean(),
+        options, // Only include options for applicable field types
         date: faker.date.recent({ days: 4.5 }),
-        formId: form._id,  // Reference by ObjectId
+        formId: form._id, // Reference by ObjectId
       });
       await field.save();
 
       // Update number of cards in the deck
       form.numberOfFields++;
     }
-    await form.save();  // Save the updated deck with the correct card count
+    await form.save(); // Save the updated deck with the correct card count
   }
 
   console.log("Seeding completed successfully.");
@@ -75,6 +95,5 @@ seed()
     console.error(e);
   })
   .finally(() => {
-    mongoose.connection.close();  // Close MongoDB connection
+    mongoose.connection.close(); // Close MongoDB connection
   });
-

@@ -1,60 +1,71 @@
 import { FieldType } from "@/data/types";
 import FieldActions from "./field-actions";
-import { useState } from "react";
-import Author from "../shared/author";
-import useAuth from "@/hooks/use-auth";
+//import Author from "../shared/author";
+//import useAuth from "@/hooks/use-auth";
 
 type FieldProps = {
   field: FieldType;
 };
 
 const Field = ({ field }: FieldProps) => {
-  const [flipState, setFlipState] = useState(false);
-  const { user, validate } = useAuth();
+  //const { user } = useAuth();
 
-  const toggleFlip = async () => {
-    await validate();
-    setFlipState(!flipState);
-  };
-
-  const setCardStyleClass = () => {
-    if (!flipState) {
-      //front of card
-      return "mx-auto rounded-lg p-5 border-black border-2 border-solid cursor-pointer";
-    } else {
-      return "mx-auto rounded-lg p-5 border-gray-250 border-2 border-solid bg-sky-950 cursor-pointer";
-    }
-  };
-
-  const setTextStyleClass = () => {
-    if (!flipState) {
-      //front of card
-      return "flex items-center justify-center min-h-60";
-    } else {
-      return "flex items-center justify-center min-h-60 text-white";
-    }
-  };
-
-  const setActionsStyleClass = () => {
-    if (!flipState) {
-      //front of field
-      return "absolute top-14 right-5";
-    } else {
-      return "absolute top-14 left-5";
+  const renderField = () => {
+    switch (field.type) {
+      case "text":
+        return (
+          <input
+            type="text"
+            placeholder="Enter response..."
+            className="w-full p-2 border rounded"
+          />
+        );
+      case "multiple_choice":
+        return (
+          <div>
+            {field.options?.map((option, index) => (
+              <div key={index}>
+                <input type="radio" id={option} name={field.id} />
+                <label htmlFor={option}>{option}</label>
+              </div>
+            ))}
+          </div>
+        );
+      case "checkbox":
+        return (
+          <div>
+            {field.options?.map((option, index) => (
+              <div key={index}>
+                <input type="checkbox" id={option} name={field.id} />
+                <label htmlFor={option}>{option}</label>
+              </div>
+            ))}
+          </div>
+        );
+      case "dropdown":
+        return (
+          <select className="w-full p-2 border rounded">
+            {field.options?.map((option, index) => (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        );
+      default:
+        return null;
     }
   };
 
   return (
     <>
       <div className="flex-none p-12 border-b relative">
-        <Author author={user} />
-        <div className={setCardStyleClass()} onClick={toggleFlip}>
-          <div className={setTextStyleClass()}>
-            {!flipState && field.front}
-            {flipState && field.back}
-          </div>
+        {/*  <Author author={user} /> */}
+        <div className="mx-auto rounded-lg p-5 border-black border-2 border-solid">
+          <label className="block mb-2">{field.label}</label>
+          {renderField()}
         </div>
-        <div className={setActionsStyleClass()}>
+        <div className="absolute top-14 right-5">
           <FieldActions field={field} />
         </div>
       </div>

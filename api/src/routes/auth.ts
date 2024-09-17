@@ -122,7 +122,7 @@ authRoutes.post("/sign-out", async (c) => {
 
 authRoutes.post("/validate-session", async (c) => {
   const cookie = c.req.header("Cookie") ?? "";
-  console.log(cookie)
+  console.log(cookie);
   const sessionId = lucia.readSessionCookie(cookie);
   if (!sessionId) {
     return c.json({ success: false, message: "Session is not valid" });

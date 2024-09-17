@@ -43,8 +43,8 @@ const Header = () => {
     }
     return (
       <div className="text-red-600">
-        {limit * (curPage - 1) + 1} - {limit * curPage - (limit - fields.length)}{" "}
-        of {fields.length} fields
+        {limit * (curPage - 1) + 1} -{" "}
+        {limit * curPage - (limit - fields.length)} of {fields.length} fields
       </div>
     );
   };

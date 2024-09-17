@@ -91,7 +91,6 @@ export function setDeckExists(exists: boolean) {
 export const $fields = atom<FieldType[]>([]);
 
 export function setFields(fields: FieldType[]) {
-  console.log(fields)
   $fields.set(fields);
 }
 
@@ -103,13 +102,24 @@ export function removeField(id: string) {
   $fields.set($fields.get().filter((i) => i.id !== id));
 }
 
-export function updateFieldContent(id: string, front: string, back: string) {
+export function updateFieldContent(
+  id: string,
+  updatedData: {
+    label?: string;
+    type?: "text" | "multiple_choice" | "checkbox" | "dropdown";
+    required?: boolean;
+    options?: string[];
+  },
+) {
   $fields.set(
-    $fields.get().map((i) => {
-      if (i.id === id) {
-        return { ...i, front: front, back: back };
+    $fields.get().map((field) => {
+      if (field.id === id) {
+        return {
+          ...field,
+          ...updatedData, // Apply the updated data (label, type, required, options)
+        };
       }
-      return i;
+      return field;
     }),
   );
 }

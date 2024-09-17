@@ -11,8 +11,8 @@ import { HTTPException } from "hono/http-exception";
 import { zCustomErrorMessage } from "../validators/zCustomError";
 import { authGuard } from "../middlewares/auth-guard";
 import { Context } from "../lib/context";
-import { customAlphabet } from 'nanoid';
-const nanoid = customAlphabet('1234567890', 6);
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890", 6);
 
 const formsRouter = new Hono<Context>();
 
@@ -26,7 +26,12 @@ formsRouter.get(
     }
   }),
   async (c) => {
-    const { sort = "asc", search = "", page = 1, limit = 10 } = c.req.valid("query");
+    const {
+      sort = "asc",
+      search = "",
+      page = 1,
+      limit = 10,
+    } = c.req.valid("query");
 
     const user = c.get("user");
 
@@ -40,20 +45,21 @@ formsRouter.get(
     }
 
     // Sort options
-    const sortOptions: Record<string, 1 | -1> = sort === "desc" ? { date: -1 } : { date: 1 };
+    const sortOptions: Record<string, 1 | -1> =
+      sort === "desc" ? { date: -1 } : { date: 1 };
 
     const formsData = await Form.find(formQuery)
       .populate("userId", "name username") // Populate author info
       .sort(sortOptions)
       .skip((page - 1) * limit)
       .limit(limit)
-      .lean()
-    
+      .lean();
+
     // Map through the results and replace _id with id
-    const modifiedFormsData = formsData.map(form => ({
+    const modifiedFormsData = formsData.map((form) => ({
       ...form,
-      id: form._id,  // Create `id` field from `_id`
-      _id: undefined,  // Remove the `_id` field
+      id: form._id, // Create `id` field from `_id`
+      _id: undefined, // Remove the `_id` field
     }));
 
     const totalCount = await Form.countDocuments(formQuery);
@@ -69,7 +75,7 @@ formsRouter.get(
         totalCount,
       },
     });
-  }
+  },
 );
 
 // GET route for retrieving a specific form by id
@@ -101,7 +107,7 @@ formsRouter.get(
       message: "Form retrieved successfully",
       data: form,
     });
-  }
+  },
 );
 
 // DELETE route for removing a specific form by id from db
@@ -138,7 +144,7 @@ formsRouter.delete(
       message: "Form deleted successfully",
       data: deletedForm,
     });
-  }
+  },
 );
 
 // POST route for creating a new form
@@ -169,9 +175,9 @@ formsRouter.post(
         message: "Form created successfully",
         data: newForm,
       },
-      201
+      201,
     );
-  }
+  },
 );
 
 // PATCH route for updating an existing form by id
@@ -211,7 +217,7 @@ formsRouter.patch(
       message: "Form updated successfully",
       data: updatedForm,
     });
-  }
+  },
 );
 
 export default formsRouter;

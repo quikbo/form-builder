@@ -4,13 +4,19 @@ import { Input } from "@/components/ui/input";
 import useAuth from "@/hooks/use-auth";
 import { $router } from "@/lib/router";
 import { getPagePath, redirectPage } from "@nanostores/router";
+import { useStore } from "@nanostores/react";
+import { $user } from "@/lib/store";
+import { useEffect } from "react";
 
 const Register = () => {
-  const { user, register } = useAuth();
+  const { register } = useAuth();
+  const user = useStore($user);
 
-  if (user && user.username) {
-    redirectPage($router, "home");
-  }
+  useEffect(() => {
+    if (user && user.username) {
+      redirectPage($router, "home");
+    }
+  }, [user]);
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

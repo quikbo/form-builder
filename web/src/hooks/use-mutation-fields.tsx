@@ -28,18 +28,41 @@ const useMutationFields = (formId: string) => {
       });
     }
   };
-
+  // Update field content by ID (including label, required, type, and options)
   const updateFieldContentById = async (
     fieldId: string,
-    front: string,
-    back: string,
+    label: string,
+    type: "text" | "multiple_choice" | "checkbox" | "dropdown",
+    required: boolean,
+    options?: string[],
   ) => {
     try {
-      if (!front && !back) {
-        throw new Error("Front and back cannot be empty!");
+      if (!label) {
+        throw new Error("Label cannot be empty!");
       }
-      await updateField(formId, fieldId, front, back);
-      updateFieldContent(fieldId, front, back);
+
+      let fieldOptions = undefined;
+      if (options && options.length >= 0) {
+        fieldOptions = options;
+      }
+
+      // Call the API to update the field with new properties
+      await updateField(
+        formId,
+        fieldId,
+        label,
+        type,
+        required,
+        fieldOptions, // Send options only if available
+      );
+
+      // Update the field in the store
+      updateFieldContent(fieldId, {
+        label,
+        type,
+        required,
+        options: options?.length ? options : undefined,
+      });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -49,16 +72,39 @@ const useMutationFields = (formId: string) => {
     }
   };
 
-  const addNewField = async (front: string, back: string) => {
+  // Add a new field (with new properties)
+  const addNewField = async (
+    label: string,
+    type: "text" | "multiple_choice" | "checkbox" | "dropdown",
+    required: boolean,
+    options?: string[],
+  ) => {
     try {
-      if (!front || !back) {
-        throw new Error("Front and back cannot be empty!");
+      if (!label) {
+        throw new Error("Label cannot be empty!");
       }
-      const field = await createField(formId, front, back);
+
+      let fieldOptions = undefined;
+      if (options && options.length >= 0) {
+        fieldOptions = options;
+      }
+
+      // Call the API to create the new field
+      const field = await createField(
+        formId,
+        label,
+        type,
+        required,
+        fieldOptions,
+      );
+
+      // Add the new field with author details
       const fieldWithAuthor = {
         id: field.id,
-        front: field.front,
-        back: field.back,
+        label: field.label,
+        type: field.type,
+        required: field.required,
+        options: field.options,
         date: field.date,
         formId: field.formId,
         author: {
