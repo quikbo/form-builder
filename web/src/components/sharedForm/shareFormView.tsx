@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { fetchFormByShareLink } from "@/data/api"; // Adjust import based on your file structure
 import { FormType, FieldType } from "@/data/types"; // Adjust import based on your file structure
 import { toast } from "@/components/ui/use-toast";
@@ -15,36 +15,37 @@ const SharedFormView = ({ shareId }: { shareId: string }) => {
   // Using the custom hook to fetch fields
   const { fields, loadFields } = useQueryFields(""); // Initially empty formId
 
+  // Wrap loadFields in useCallback to ensure a stable reference
+  const loadFormAndFields = useCallback(async () => {
+    try {
+      const formData = await fetchFormByShareLink(shareId);
+      setForm(formData); // Set form data
+      if (formData && formData.id) {
+        await loadFields(Number(formData.id)); // Load fields for the form using formId
+      }
+    } catch (error) {
+      const errorMessage =
+        (error as Error).message ?? "Please try again later!";
+      toast({
+        variant: "destructive",
+        title: "Error loading form",
+        description: errorMessage,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [shareId]); // Include only necessary dependencies
+
   // Fetch the form data using the shareId
   useEffect(() => {
-    const loadFormAndFields = async () => {
-      try {
-        const formData = await fetchFormByShareLink(shareId);
-        setForm(formData); // Set form data
-
-        if (formData.id) {
-          await loadFields(Number(formData.id)); // Load fields for the form using formId
-        }
-      } catch (error) {
-        const errorMessage =
-          (error as Error).message ?? "Please try again later!";
-        toast({
-          variant: "destructive",
-          title: "Error loading form",
-          description: errorMessage,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadFormAndFields(); // Load form and fields when the component mounts or shareId changes
-  }, [shareId, loadFields]);
+  }, [loadFormAndFields]);
 
   // Handle submit button click
   const handleSubmit = async () => {
     if (!form) return;
-
+    console.log("Responses before submission:", responses);
+  
     // Check if all required fields are filled
     const requiredFields = fields.filter((field: FieldType) => field.required);
     const missingFields = requiredFields.filter((field) => !responses[field.id]);
@@ -56,14 +57,20 @@ const SharedFormView = ({ shareId }: { shareId: string }) => {
       });
       return;
     }
-
+  
+    // Log the responses to check if all fields have values
+    console.log("Submitting responses: ", responses);
+  
     try {
       // Map responses object to the expected format [{ fieldId, response }]
       const formattedResponses = Object.entries(responses).map(([fieldId, response]) => ({
         fieldId,
         response,
       }));
-
+  
+      // Log the formatted responses for debugging
+      console.log("Formatted responses: ", formattedResponses);
+  
       await addNewResponse(form.id, formattedResponses);
       toast({
         variant: "default",
@@ -80,6 +87,7 @@ const SharedFormView = ({ shareId }: { shareId: string }) => {
       });
     }
   };
+  
 
   // Display loading state while fetching form data
   if (loading) {

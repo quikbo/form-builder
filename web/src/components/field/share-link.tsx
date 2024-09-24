@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogDescription, // Import DialogDescription
 } from '../ui/dialog';
 import { Share1Icon } from '@radix-ui/react-icons'; // Import the share icon from Heroicons
 
@@ -48,13 +49,16 @@ const ShareLink = ({ formId }: ShareLinkProps) => {
       {/* Trigger button to open dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-        <div className="cursor-pointer bg-white border border-gray-300 rounded flex items-center justify-center w-10 h-10 shadow-sm hover:shadow-md transition duration-150">
+          <div className="cursor-pointer bg-white border border-gray-300 rounded flex items-center justify-center w-10 h-10 shadow-sm hover:shadow-md transition duration-150">
             <Share1Icon className="w-6 h-6 text-gray-600" />
           </div>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Shareable Link</DialogTitle>
+            <DialogDescription>
+              Copy the link below to share this form with others.
+            </DialogDescription>
           </DialogHeader>
           {loading ? (
             <p>Loading...</p>

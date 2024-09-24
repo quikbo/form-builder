@@ -37,9 +37,11 @@ const SharedFields = ({ formId, onResponseChange }: SharedFieldsProps) => {
 
   // Function to handle input change for fields
   const handleInputChange = (fieldId: string, value: any) => {
-    const updatedResponses = { ...responses, [fieldId]: value }; // Update responses state
-    setResponses(updatedResponses);
-    onResponseChange(updatedResponses); // Pass updated responses to parent
+    setResponses((prevResponses) => {
+      const updatedResponses = { ...prevResponses, [fieldId]: value }; // Update responses state
+      onResponseChange(updatedResponses); // Pass updated responses to parent
+      return updatedResponses; // Return updated state
+    });
   };
 
   // Display loading state while fetching fields
@@ -65,7 +67,8 @@ const SharedFields = ({ formId, onResponseChange }: SharedFieldsProps) => {
          <SharedField
          field={field}
          key={field.id}
-         onInputChange={handleInputChange} // Pass input change handler to SharedField component
+         onChange={handleInputChange} // Pass input change handler to SharedField component
+         currentResponse={responses[field.id]}
        />
       ))}
     </div>

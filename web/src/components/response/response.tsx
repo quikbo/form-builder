@@ -22,7 +22,6 @@ const renderFieldResponse = (fieldResponse: FieldResponseType) => {
 };
 
 const Response = ({ response }: ResponseProps) => {
-  //console.log(response)
   return (
     <div className="bg-white shadow-sm rounded-lg p-6 mb-4 border border-gray-200">
       {/* Response Header */}

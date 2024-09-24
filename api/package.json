@@ -4,7 +4,8 @@
     "start": "tsx src/server.ts",
     "dev": "tsx watch src/server.ts",
     "prettier": "prettier --write \"src/**/*.ts\" --config \".prettierrc.json\"",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "db:clear": "tsx src/db/clear.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",

@@ -10,7 +10,6 @@ type FormProps = {
   form: FormType;
 };
 
-//REFACTOR TO BEING ABLE TO JUST CLICK DECK TO OPEN IT RATHER THAN USING BUTTON
 const Form = ({ form }: FormProps) => {
   const { validate } = useAuth();
 
@@ -21,33 +20,39 @@ const Form = ({ form }: FormProps) => {
     openPage($router, "form", { formId: form.id });
   };
 
+  // Prevent click events from propagating to the parent div
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="flex-none p-12 border-b">
+    <div className="flex-none p-4 border-b">
       <div
-        className="mx-auto rounded shadow-xl p-5 
-        border-b-8 border-r-8 border-gray-110  border-double"
+        className="mx-auto rounded-lg shadow-md p-4 
+        border border-gray-200 bg-white hover:shadow-lg transition duration-150 ease-in-out cursor-pointer"
+        onClick={navigateToCardsView} // Navigate when clicking the entire card
       >
-        <div className="flex justify-between p1-4">
-          <div className="py-4 cursor-pointer" onClick={navigateToCardsView}>
-            <div className="text-xl font-bold">{form.title}</div>
-            <div className="text-s text-gray-600">
+        <div className="flex justify-between">
+          {/* Form Content */}
+          <div>
+            <div className="text-lg font-semibold mb-1">{form.title}</div>
+            <div className="text-sm text-gray-500 mb-2">
               {form.numberOfFields} Fields
             </div>
-            <div className="h-40"></div>
-            <div>
-              <h4 className="text-s text-gray-600">
-                {new Date(form.date).toLocaleString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                })}
-              </h4>
-              <Author author={form.userId} />
+            <div className="text-xs text-gray-400 mb-2">
+              {new Date(form.date).toLocaleString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+              })}
             </div>
+            <Author author={form.userId} />
           </div>
-          <div className="top-0 right-0">
+
+          {/* Actions */}
+          <div onClick={stopPropagation}>
             <FormActions form={form} />
           </div>
         </div>
