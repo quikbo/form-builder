@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import useQueryFields from '@/hooks/use-query-fields';
 import { toast } from '@/components/ui/use-toast';
-import Field from '@/components/field/field'; // Adjust path as needed
+import { FieldType } from '@/data/types'; // Import FieldType for field props
+import SharedField from './sharedField';
 
 type SharedFieldsProps = {
   formId: string;
+  onResponseChange: (responses: Record<string, any>) => void; // Callback to send responses to parent component
 };
 
-const SharedFields = ({ formId }: SharedFieldsProps) => {
+const SharedFields = ({ formId, onResponseChange }: SharedFieldsProps) => {
   const [fieldsLoading, setFieldsLoading] = useState(true);
+  const [responses, setResponses] = useState<Record<string, any>>({}); // State to track responses
 
   // Initialize the useQueryFields hook
   const { fields, loadFields } = useQueryFields(formId);
@@ -32,6 +35,13 @@ const SharedFields = ({ formId }: SharedFieldsProps) => {
     fetchFields();
   }, [formId]);
 
+  // Function to handle input change for fields
+  const handleInputChange = (fieldId: string, value: any) => {
+    const updatedResponses = { ...responses, [fieldId]: value }; // Update responses state
+    setResponses(updatedResponses);
+    onResponseChange(updatedResponses); // Pass updated responses to parent
+  };
+
   // Display loading state while fetching fields
   if (fieldsLoading) {
     return <div>Loading fields...</div>;
@@ -42,18 +52,21 @@ const SharedFields = ({ formId }: SharedFieldsProps) => {
     return (
       <div className="flex items-center justify-center min-h-dvh">
         <p>
-          This form has no fields to display. Create one with the red plus
-          button.
+          This form has no fields to display.
         </p>
       </div>
     );
   }
 
-  // Display the fields
+  // Display the fields and capture responses
   return (
     <div>
-      {fields.map((field) => (
-        <Field field={field} key={field.id} />
+      {fields.map((field: FieldType) => (
+         <SharedField
+         field={field}
+         key={field.id}
+         onInputChange={handleInputChange} // Pass input change handler to SharedField component
+       />
       ))}
     </div>
   );

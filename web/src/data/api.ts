@@ -1,5 +1,5 @@
 import { API_URL } from "@/env.ts";
-import { FormType, FieldType, UserType } from "./types";
+import { FormType, FieldType, UserType, ResponsesType } from "./types";
 
 //FORMS API
 
@@ -303,3 +303,90 @@ export const checkExistingShareLink = async (
   return responseJSON.data;
 };
 
+
+// Create a new response for a form
+export const createResponse = async (
+  formId: string,
+  fieldResponses: { fieldId: string; response?: any }[],
+  userId?: string // Optional if you want to track who submitted
+): Promise<ResponsesType> => {
+  const response = await fetch(`${API_URL}/responses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      formId,
+      fieldResponses,
+      userId,
+    }),
+    credentials: "include",
+  });
+  const responseJSON = await response.json();
+  if (!responseJSON.success) {
+    throw new Error(`${responseJSON.message}`);
+  }
+  return responseJSON.data;
+};
+
+// Fetch all responses for a specific form
+export const fetchResponsesByFormId = async (
+  formId: string,
+  page: number = 1,
+  limit: number = 10
+): Promise<{
+  data: ResponsesType[];
+  totalResponses: number;
+  totalPages: number;
+  limit: number;
+}> => {
+  const response = await fetch(
+    `${API_URL}/responses/form/${formId}?page=${page}&limit=${limit}`,
+    {
+      credentials: "include",
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Fetch Responses API request failed with code: ${response.status}`);
+  }
+  const responseJSON = await response.json();
+  const data = responseJSON.data;
+  const totalResponses = responseJSON.meta.totalCount;
+  const totalPages = responseJSON.meta.totalPages;
+  return { data, totalResponses, totalPages, limit };
+};
+
+// Update an existing response
+export const updateResponseFields = async (
+  responseId: string,
+  fieldResponses: { fieldId: string; response?: any }[]
+): Promise<ResponsesType> => {
+  const response = await fetch(`${API_URL}/responses/${responseId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fieldResponses,
+    }),
+    credentials: "include",
+  });
+  const responseJSON = await response.json();
+  if (!responseJSON.success) {
+    throw new Error(`${responseJSON.message}`);
+  }
+  return responseJSON.data;
+};
+
+// Delete a response by its ID
+export const deleteResponse = async (responseId: string): Promise<boolean> => {
+  const response = await fetch(`${API_URL}/responses/${responseId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  const responseJSON = await response.json();
+  if (!responseJSON.success) {
+    throw new Error(`${responseJSON.message}`);
+  }
+  return true;
+};

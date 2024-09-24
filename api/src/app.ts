@@ -9,6 +9,7 @@ import { auth } from "./middlewares/auth";
 import { Context } from "./lib/context";
 import { connectToDatabase } from "./db/index"; // Adjust the path as necessary
 import shareLinksRouter from "./routes/shareLinks";
+import responsesRouter from "./routes/responses";
 
 // Connect to MongoDB
 connectToDatabase()
@@ -42,6 +43,7 @@ app.route("/", authRoutes);
 app.route("/", formsRouter);
 app.route("/", fieldsRouter);
 app.route("/", shareLinksRouter);
+app.route("/", responsesRouter);
 
 app.onError((err, c) => {
   console.error(`${err}`);

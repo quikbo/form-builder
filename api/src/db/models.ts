@@ -59,9 +59,35 @@ const sessionSchema = new mongoose.Schema({
   expiresAt: { type: Date, required: true }, // Use Date for expiration time
 });
 
+const responseSchema = new mongoose.Schema({
+  formId: {
+    type: String,
+    ref: "Form",
+    required: true,
+  },
+  fieldResponses: [
+    {
+      fieldId: {
+        type: String,
+        ref: "Field",
+        required: true,
+      },
+      response: {
+        type: mongoose.Schema.Types.Mixed, // Use Mixed type to support various response formats
+        required: true,
+      },
+    },
+  ],
+  submittedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 // Export Models
 export const User = mongoose.model("User", userSchema);
 export const Form = mongoose.model("Form", formSchema);
 export const ShareLink = mongoose.model('ShareLink', shareLinkSchema);
 export const Field = mongoose.model("Field", fieldSchema);
 export const Session = mongoose.model("Session", sessionSchema);
+export const Response = mongoose.model("Response", responseSchema);

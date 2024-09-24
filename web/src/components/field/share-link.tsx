@@ -1,6 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useShareLink from '@/hooks/use-shareLink';
 import { toast } from '@/components/ui/use-toast';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '../ui/dialog';
+import { Share1Icon } from '@radix-ui/react-icons'; // Import the share icon from Heroicons
 
 type ShareLinkProps = {
   formId: string;
@@ -8,6 +18,7 @@ type ShareLinkProps = {
 
 const ShareLink = ({ formId }: ShareLinkProps) => {
   const { generateShareLink, checkExistingLink, shareLink, loading } = useShareLink();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Check for existing share link on component mount
   useEffect(() => {
@@ -34,34 +45,53 @@ const ShareLink = ({ formId }: ShareLinkProps) => {
 
   return (
     <div className="mt-4">
-      {loading ? (
-        <p>Loading...</p>
-      ) : shareLink ? (
-        <div>
-          <p>Shareable Link:</p>
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              readOnly
-              value={shareLink}
-              className="border p-1 w-full rounded"
-            />
-            <button
-              onClick={handleCopyToClipboard}
-              className="bg-blue-500 text-white px-2 py-1 rounded"
-            >
-              Copy
-            </button>
+      {/* Trigger button to open dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+        <div className="cursor-pointer bg-white border border-gray-300 rounded flex items-center justify-center w-10 h-10 shadow-sm hover:shadow-md transition duration-150">
+            <Share1Icon className="w-6 h-6 text-gray-600" />
           </div>
-        </div>
-      ) : (
-        <button
-          onClick={handleGenerateLink}
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          Generate Share Link
-        </button>
-      )}
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Shareable Link</DialogTitle>
+          </DialogHeader>
+          {loading ? (
+            <p>Loading...</p>
+          ) : shareLink ? (
+            <div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareLink}
+                  className="border p-1 w-full rounded"
+                />
+                <button
+                  onClick={handleCopyToClipboard}
+                  className="bg-blue-500 text-white px-2 py-1 rounded"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleGenerateLink}
+              className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+            >
+              Generate Share Link
+            </button>
+          )}
+          <DialogFooter>
+            <DialogClose asChild>
+              <button className="bg-gray-300 text-black px-4 py-2 rounded">
+                Close
+              </button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

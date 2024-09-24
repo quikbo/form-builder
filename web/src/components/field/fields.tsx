@@ -1,10 +1,18 @@
+import { useEffect } from "react";
 import Paginator from "../shared/pagination";
 import Field from "./field";
 import useQueryFields from "@/hooks/use-query-fields";
-import ShareLink from "./share-link";
+import { $currentPage, $totalFieldCount } from "@/lib/store";
+import { useStore } from "@nanostores/react";
 
 const Fields = ({ formId }: { formId: string }) => {
   const { fields, loadFields } = useQueryFields(formId);
+  const totalFieldCount = useStore($totalFieldCount);
+  const curPage = useStore($currentPage);
+
+  useEffect(() => {
+    loadFields(curPage);
+  }, [totalFieldCount]);
 
   const loadFieldsPage = (pageIndex: number) => {
     loadFields(pageIndex);
@@ -22,7 +30,6 @@ const Fields = ({ formId }: { formId: string }) => {
   } else {
     return (
       <>
-      <ShareLink formId={formId} />
       <Paginator loadPage={loadFieldsPage}>
         {fields.map((field) => (
           <Field field={field} key={field.id} />

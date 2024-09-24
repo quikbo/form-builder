@@ -130,3 +130,26 @@ export const getShareLinkSchema = z.object({
     .min(1, "Share ID is required")
     .max(20, "Share ID must be 20 characters or less"),
 });
+
+// Schema for validating each field response
+export const fieldResponseSchema = z.object({
+  fieldId: z.string().min(1), // Validate that fieldId is a non-empty string
+  response: z.any().optional(), // Response can be of any type (text, number, etc.), so we use .any()
+});
+
+// Schema for creating a new response
+export const createResponseSchema = z.object({
+  formId: z.string().min(1), // Validate that formId is a non-empty string
+  fieldResponses: z
+    .array(fieldResponseSchema)
+    .nonempty("Field responses cannot be empty"), // Validate that fieldResponses is a non-empty array
+});
+
+// Schema for getting responses by form ID
+export const getResponsesByFormIdSchema = z.object({
+  formId: z.string().min(1), // Validate that formId is a non-empty string
+});
+
+export const getResponseSchema = z.object({
+  id: z.string().min(1, "Response ID is required"), // Validate that id is a non-empty string
+});

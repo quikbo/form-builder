@@ -1,4 +1,4 @@
-import { FormType, FieldType, UserType } from "@/data/types";
+import { FormType, FieldType, UserType, ResponsesType } from "@/data/types";
 import { atom } from "nanostores";
 import { persistentMap } from "@nanostores/persistent";
 import { logger } from "@nanostores/logger";
@@ -141,4 +141,45 @@ export function clearUser() {
   $user.set(defaultUser);
 }
 
-DEBUG && logger({ $forms, $currentPage, $fields });
+//RESPONSES
+export const $responses = atom<ResponsesType[]>([]);
+
+export function setResponses(responses: ResponsesType[]) {
+  $responses.set(responses);
+}
+
+export function addResponse(response: ResponsesType) {
+  $responses.set([response, ...$responses.get()]);
+}
+
+export function updateResponseById(id: string, updatedData: Partial<ResponsesType>) {
+  $responses.set(
+    $responses.get().map((response) => {
+      if (response.id === id) {
+        return {
+          ...response,
+          ...updatedData, // Apply the updated data
+        };
+      }
+      return response;
+    }),
+  );
+}
+
+export function removeResponse(id: string) {
+  $responses.set($responses.get().filter((r) => r.id !== id));
+}
+
+export const $totalResponsePages = atom<number>(1);
+export function setTotalResponsePages(pages: number) {
+  $totalResponsePages.set(pages);
+}
+
+export const $totalResponseCount = atom<number>(1);
+export function setTotalResponseCount(count: number) {
+  $totalResponseCount.set(count);
+}
+
+DEBUG && logger({ $forms, $currentPage, $fields, $responses });
+
+
