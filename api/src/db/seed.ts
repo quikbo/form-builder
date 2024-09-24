@@ -1,10 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { hash } from "@node-rs/argon2";
-import { User, Form, Field, Session } from "./models"; // Mongoose models
+import { User, Form, Field, Session, ShareLink } from "./models"; // Mongoose models
 import mongoose from "mongoose";
 import { connectToDatabase } from "./index";
 import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet("1234567890", 6); // Creates a 10-character unique ID
+const shareIdGenerator = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 10);
 
 async function seed() {
   console.log("Connecting to the database...");
@@ -16,6 +17,7 @@ async function seed() {
   await Form.deleteMany({});
   await User.deleteMany({});
   await Session.deleteMany({});
+  await ShareLink.deleteMany({});
 
   console.log("Inserting new seed data...");
 
@@ -84,6 +86,12 @@ async function seed() {
       form.numberOfFields++;
     }
     await form.save(); // Save the updated deck with the correct card count
+    // Create a share link for the form
+    const shareLink = new ShareLink({
+      formId: form._id, // Reference the form ID
+      shareId: shareIdGenerator() // Generate unique share ID
+    });
+    await shareLink.save();
   }
 
   console.log("Seeding completed successfully.");

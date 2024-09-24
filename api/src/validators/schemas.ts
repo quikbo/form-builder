@@ -115,3 +115,18 @@ export const signInSchema = z.object({
   username: z.string(),
   password: z.string(),
 });
+
+// Schema to validate the form ID for creating a share link
+export const createShareLinkSchema = z.object({
+  formId: z.coerce.number().int().positive({
+    message: "Form ID must be a positive integer",
+  }),
+});
+
+// Schema to validate the share ID parameter
+export const getShareLinkSchema = z.object({
+  shareId: z
+    .string()
+    .min(1, "Share ID is required")
+    .max(20, "Share ID must be 20 characters or less"),
+});

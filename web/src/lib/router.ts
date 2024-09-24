@@ -7,4 +7,5 @@ export const $router = createRouter({
   login: `${BASE_URL}login`,
   register: `${BASE_URL}register`,
   notfound: `${BASE_URL}404`,
+  shareForm: `${BASE_URL}share/:shareId`,
 });

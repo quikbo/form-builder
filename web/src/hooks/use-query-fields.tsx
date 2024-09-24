@@ -14,6 +14,9 @@ const useQueryFields = (formId: string) => {
   const fields = useStore($fields);
 
   const loadFields = async (page: number = 1) => {
+    if (formId === '') {
+      return;
+    }
     try {
       const {
         data: fetchedCards,

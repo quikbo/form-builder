@@ -249,3 +249,57 @@ export const validateSession = async (): Promise<boolean> => {
   const responseJSON = await response.json();
   return responseJSON.success;
 };
+
+
+// Function to create a share link for a specific form
+export const createShareLink = async (formId: string): Promise<{ shareId: string }> => {
+  const response = await fetch(`${API_URL}/share/form/${formId}`, {
+    method: "POST",
+    credentials: "include", // Include credentials if required by authGuard
+  });
+  const responseJSON = await response.json();
+  if (!responseJSON.success) {
+    throw new Error(`${responseJSON.message}`);
+  }
+  return responseJSON.data;
+};
+
+// Function to fetch a form using the share link
+export const fetchFormByShareLink = async (shareId: string): Promise<FormType> => {
+  const response = await fetch(`${API_URL}/share/${shareId}`, {
+    credentials: "include", // Optional: if you have public access, remove this
+  });
+  const responseJSON = await response.json();
+  if (!responseJSON.success) {
+    throw new Error(`${responseJSON.message}`);
+  }
+  return responseJSON.data;
+};
+
+// Function to delete a share link for a specific form
+export const deleteShareLink = async (shareId: string): Promise<boolean> => {
+  const response = await fetch(`${API_URL}/share/${shareId}`, {
+    method: "DELETE",
+    credentials: "include", // Include credentials if required by authGuard
+  });
+  const responseJSON = await response.json();
+  if (!responseJSON.success) {
+    throw new Error(`${responseJSON.message}`);
+  }
+  return true;
+};
+
+// Function to check if a share link already exists for a specific form
+export const checkExistingShareLink = async (
+  formId: string
+): Promise<{ shareId: string } | null> => {
+  const response = await fetch(`${API_URL}/share/form/${formId}`, {
+    credentials: "include", // Include credentials if needed
+  });
+  const responseJSON = await response.json();
+  if (!responseJSON.success) {
+    throw new Error(`${responseJSON.message}`);
+  }
+  return responseJSON.data;
+};
+

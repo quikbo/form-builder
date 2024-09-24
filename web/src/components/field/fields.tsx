@@ -1,6 +1,7 @@
 import Paginator from "../shared/pagination";
 import Field from "./field";
 import useQueryFields from "@/hooks/use-query-fields";
+import ShareLink from "./share-link";
 
 const Fields = ({ formId }: { formId: string }) => {
   const { fields, loadFields } = useQueryFields(formId);
@@ -20,11 +21,14 @@ const Fields = ({ formId }: { formId: string }) => {
     );
   } else {
     return (
+      <>
+      <ShareLink formId={formId} />
       <Paginator loadPage={loadFieldsPage}>
         {fields.map((field) => (
           <Field field={field} key={field.id} />
         ))}
       </Paginator>
+      </>
     );
   }
 };

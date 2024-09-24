@@ -8,6 +8,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import UserMenu from "./components/layout/user-menu";
 import useAuth from "./hooks/use-auth";
+import SharedFormView from "./components/sharedForm/shareFormView";
 //import { $sessionValid, clearUser } from "./lib/store";
 
 function App() {
@@ -22,6 +23,17 @@ function App() {
 
   if (page.route === "notfound") {
     return <NotFoundPage />;
+  }
+
+  if (page.route === "shareForm") { // Check for the shareForm route
+    return (
+      <div className="flex min-h-dvh">
+        <div className="w-full max-w-md mx-auto md:max-w-lg">
+          <SharedFormView shareId={page.params.shareId} />
+        </div>
+        <Toaster />
+      </div>
+    );
   }
 
   if (user && !user.username) {

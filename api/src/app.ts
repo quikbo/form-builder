@@ -8,6 +8,7 @@ import { logger } from "hono/logger";
 import { auth } from "./middlewares/auth";
 import { Context } from "./lib/context";
 import { connectToDatabase } from "./db/index"; // Adjust the path as necessary
+import shareLinksRouter from "./routes/shareLinks";
 
 // Connect to MongoDB
 connectToDatabase()
@@ -40,6 +41,7 @@ app.get("/", (c) => {
 app.route("/", authRoutes);
 app.route("/", formsRouter);
 app.route("/", fieldsRouter);
+app.route("/", shareLinksRouter);
 
 app.onError((err, c) => {
   console.error(`${err}`);
